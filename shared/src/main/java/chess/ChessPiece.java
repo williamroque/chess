@@ -1,10 +1,6 @@
 package chess;
 
-import chess.pieces.Bishop;
-import chess.strategies.classic.BishopStrategy;
-import chess.strategies.classic.KingStrategy;
-import chess.strategies.classic.KnightStrategy;
-import chess.strategies.classic.PawnStrategy;
+import chess.strategies.classic.*;
 
 import java.util.Collection;
 import java.util.Map;
@@ -25,7 +21,8 @@ public class ChessPiece {
             PieceType.BISHOP, new BishopStrategy(),
             PieceType.KING, new KingStrategy(),
             PieceType.KNIGHT, new KnightStrategy(),
-            PieceType.PAWN, new PawnStrategy()
+            PieceType.PAWN, new PawnStrategy(),
+            PieceType.ROOK, new RookStrategy()
     );
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
