@@ -31,8 +31,8 @@ public class ChessBoard {
     public static ChessPosition algebraicToPosition(String position) {
         String files = "abcdefgh";
 
-        int col = files.indexOf(position.charAt(0));
-        int row = 8 - Integer.parseInt(String.valueOf(position.charAt(1)));
+        int col = files.indexOf(position.charAt(0)) + 1;
+        int row = Integer.parseInt(String.valueOf(position.charAt(1)));
 
         return new ChessPosition(row, col);
     }
@@ -48,7 +48,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        this.board[position.getRow()][position.getColumn()] = piece;
+        this.board[8 - position.getRow()][position.getColumn() - 1] = piece;
     }
 
     /**
@@ -59,7 +59,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return this.board[position.getRow()][position.getColumn()];
+        return this.board[8 - position.getRow()][position.getColumn() - 1];
     }
 
     /**
