@@ -4,6 +4,7 @@ import chess.pieces.Bishop;
 import chess.strategies.classic.BishopStrategy;
 import chess.strategies.classic.KingStrategy;
 import chess.strategies.classic.KnightStrategy;
+import chess.strategies.classic.PawnStrategy;
 
 import java.util.Collection;
 import java.util.Map;
@@ -23,7 +24,8 @@ public class ChessPiece {
     private final Map<ChessPiece.PieceType, ChessStrategy> strategyRegistry = Map.of(
             PieceType.BISHOP, new BishopStrategy(),
             PieceType.KING, new KingStrategy(),
-            PieceType.KNIGHT, new KnightStrategy()
+            PieceType.KNIGHT, new KnightStrategy(),
+            PieceType.PAWN, new PawnStrategy()
     );
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
