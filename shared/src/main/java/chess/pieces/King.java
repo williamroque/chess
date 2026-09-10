@@ -5,6 +5,6 @@ import chess.ChessPiece;
 
 public class King extends ChessPiece {
     public King(ChessGame.TeamColor pieceColor) {
-        super(pieceColor, PieceType.KING);
+        super(pieceColor, PieceType.KING, "K");
     }
 }

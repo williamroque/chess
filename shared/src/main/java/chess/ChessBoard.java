@@ -104,4 +104,27 @@ public class ChessBoard {
     public int hashCode() {
         return Arrays.deepHashCode(board);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder representation = new StringBuilder();
+
+        for (ChessPiece[] row : board) {
+            for (ChessPiece col : row) {
+                if (col == null) {
+                    representation.append(".. ");
+                    continue;
+                }
+
+                representation.append(
+                        col.getTeamColor() == ChessGame.TeamColor.BLACK ? "B" : "W"
+                );
+                representation.append(col.getShorthand());
+                representation.append(" ");
+            }
+            representation.append("\n");
+        }
+
+        return representation.toString();
+    }
 }

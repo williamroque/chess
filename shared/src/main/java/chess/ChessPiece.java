@@ -12,17 +12,30 @@ import java.util.Objects;
 public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
     private final ChessPiece.PieceType type;
+    private final String shorthand;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
+        this.shorthand = String.valueOf(type.name().charAt(0));
+    }
+
+    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type, String shorthand) {
+        this.pieceColor = pieceColor;
+        this.type = type;
+        this.shorthand = shorthand;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof ChessPiece)) {
             return false;
         }
+
         ChessPiece that = (ChessPiece) o;
         return pieceColor == that.pieceColor && type == that.type;
     }
@@ -64,6 +77,13 @@ public class ChessPiece {
      */
     public PieceType getPieceType() {
         return this.type;
+    }
+
+    /**
+     * @return the piece shorthand notation
+     */
+    public String getShorthand() {
+        return this.shorthand;
     }
 
     /**
