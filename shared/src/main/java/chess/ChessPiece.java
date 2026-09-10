@@ -22,7 +22,8 @@ public class ChessPiece {
             PieceType.KING, new KingStrategy(),
             PieceType.KNIGHT, new KnightStrategy(),
             PieceType.PAWN, new PawnStrategy(),
-            PieceType.ROOK, new RookStrategy()
+            PieceType.ROOK, new RookStrategy(),
+            PieceType.QUEEN, new QueenStrategy()
     );
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
