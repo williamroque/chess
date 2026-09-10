@@ -1,7 +1,6 @@
 package chess.pieces;
 
-import chess.ChessGame;
-import chess.ChessPiece;
+import chess.*;
 
 public class Bishop extends ChessPiece {
     public Bishop(ChessGame.TeamColor pieceColor) {

@@ -1,6 +1,10 @@
 package chess;
 
+import chess.pieces.Bishop;
+import chess.strategies.classic.BishopStrategy;
+
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -13,6 +17,10 @@ public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
     private final ChessPiece.PieceType type;
     private final String shorthand;
+
+    private final Map<ChessPiece.PieceType, ChessStrategy> strategyRegistry = Map.of(
+            PieceType.BISHOP, new BishopStrategy()
+    );
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
@@ -94,6 +102,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessStrategy strategy = strategyRegistry.get(this.type);
+        return strategy.getValidMoves(myPosition, board, pieceColor);
     }
 }

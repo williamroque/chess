@@ -15,6 +15,9 @@ import java.util.Objects;
 public class ChessBoard {
     private ChessPiece[][] board;
 
+    private final int BOARD_WIDTH = 8;
+    private final int BOARD_HEIGHT = 8;
+
     private static final Map<String, Class<? extends ChessPiece>> pieceMap = Map.of(
             "R", Rook.class,
             "N", Knight.class,
@@ -40,7 +43,7 @@ public class ChessBoard {
     }
 
     public ChessBoard() {
-        this.board = new ChessPiece[8][8];
+        this.board = new ChessPiece[BOARD_HEIGHT][BOARD_WIDTH];
     }
 
     /**
@@ -49,8 +52,11 @@ public class ChessBoard {
      * @param position where to add the piece to
      * @param piece    the piece to add
      */
-    public void addPiece(ChessPosition position, ChessPiece piece) {
-        this.board[8 - position.getRow()][position.getColumn() - 1] = piece;
+    public void addPiece(ChessPosition position, ChessPiece piece) throws IndexOutOfBoundsException {
+        if (!this.isValidPosition(position)) {
+            throw new IndexOutOfBoundsException();
+        }
+        this.board[BOARD_HEIGHT - position.getRow()][position.getColumn() - 1] = piece;
     }
 
     /**
@@ -60,8 +66,19 @@ public class ChessBoard {
      * @return Either the piece at the position, or null if no piece is at that
      * position
      */
-    public ChessPiece getPiece(ChessPosition position) {
-        return this.board[8 - position.getRow()][position.getColumn() - 1];
+    public ChessPiece getPiece(ChessPosition position) throws IndexOutOfBoundsException {
+        if (!this.isValidPosition(position)) {
+            throw new IndexOutOfBoundsException();
+        }
+        return this.board[BOARD_HEIGHT - position.getRow()][position.getColumn() - 1];
+    }
+
+    public boolean isValidPosition(ChessPosition position) {
+        int row = position.getRow();
+        int col = position.getColumn();
+
+        return row >= 1 && row <= BOARD_HEIGHT
+                && col >= 1 && col <= BOARD_WIDTH;
     }
 
     /**
