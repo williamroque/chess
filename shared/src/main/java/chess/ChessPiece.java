@@ -58,11 +58,11 @@ public class ChessPiece {
         private final String shorthand;
 
         PieceType(String s) {
-            this.shorthand = s;
+            shorthand = s;
         }
 
         public String getShorthand() {
-            return this.shorthand;
+            return shorthand;
         }
     }
 
@@ -70,14 +70,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        return this.pieceColor;
+        return pieceColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        return this.type;
+        return type;
     }
 
     /**
@@ -88,6 +88,6 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return strategyRegistry.get(this.type).getValidMoves(myPosition, board, this.pieceColor);
+        return strategyRegistry.get(type).getValidMoves(myPosition, board, pieceColor);
     }
 }

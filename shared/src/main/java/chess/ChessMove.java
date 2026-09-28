@@ -24,14 +24,14 @@ public class ChessMove {
      * @return ChessPosition of starting location
      */
     public ChessPosition getStartPosition() {
-        return this.startPosition;
+        return startPosition;
     }
 
     /**
      * @return ChessPosition of ending location
      */
     public ChessPosition getEndPosition() {
-        return this.endPosition;
+        return endPosition;
     }
 
     /**
@@ -41,7 +41,7 @@ public class ChessMove {
      * @return Type of piece to promote a pawn to, or null if no promotion
      */
     public ChessPiece.PieceType getPromotionPiece() {
-        return this.promotionPiece;
+        return promotionPiece;
     }
 
     @Override
@@ -60,6 +60,6 @@ public class ChessMove {
 
     @Override
     public String toString() {
-        return this.startPosition.toString() + " → " + this.endPosition.toString();
+        return startPosition.toString() + " → " + endPosition.toString();
     }
 }

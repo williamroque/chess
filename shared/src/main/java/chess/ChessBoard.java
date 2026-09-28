@@ -35,7 +35,7 @@ public class ChessBoard {
     );
 
     public ChessBoard() {
-        this.board = new ChessPiece[BOARD_HEIGHT][BOARD_WIDTH];
+        board = new ChessPiece[BOARD_HEIGHT][BOARD_WIDTH];
     }
 
     private ChessPosition algebraicToMatrix(String notation) {
@@ -61,8 +61,8 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) throws IndexOutOfBoundsException {
-        if (this.isValidPosition(position)) {
-            this.board[BOARD_HEIGHT - position.getRow()][position.getColumn() - 1] = piece;
+        if (isValidPosition(position)) {
+            board[BOARD_HEIGHT - position.getRow()][position.getColumn() - 1] = piece;
         } else {
             throw new IndexOutOfBoundsException("Position is out of bounds: " + position.toString());
         }
@@ -76,8 +76,8 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        if (this.isValidPosition(position)) {
-            return this.board[BOARD_HEIGHT - position.getRow()][position.getColumn() - 1];
+        if (isValidPosition(position)) {
+            return board[BOARD_HEIGHT - position.getRow()][position.getColumn() - 1];
         } else {
             throw new IndexOutOfBoundsException("Position is out of bounds: " + position.toString());
         }
@@ -88,7 +88,7 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        this.board = new ChessPiece[BOARD_HEIGHT][BOARD_WIDTH];
+        board = new ChessPiece[BOARD_HEIGHT][BOARD_WIDTH];
 
         for (String configuration : DEFAULT_CONFIGURATION) {
             String[] parsed = configuration.split(":");
@@ -97,7 +97,7 @@ public class ChessBoard {
             ChessPiece.PieceType type = pieceRegistry.get(parsed[1]);
             ChessPosition position = algebraicToMatrix(parsed[2]);
 
-            this.addPiece(position, new ChessPiece(team, type));
+            addPiece(position, new ChessPiece(team, type));
         }
     }
 
