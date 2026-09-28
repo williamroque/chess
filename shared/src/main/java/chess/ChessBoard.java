@@ -32,30 +32,42 @@ public class ChessBoard {
             "R", ChessPiece.PieceType.ROOK
     );
 
-    private static final Map<ChessPiece, ChessPosition> trackedPieces = new HashMap<>();
+    public ChessPosition find(ChessPiece.PieceType type, ChessGame.TeamColor team) {
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                ChessPiece piece = board[i][j];
 
-    private void updateTracker(ChessPiece piece, ChessPosition position) {
-        trackedPieces.put(piece, position);
-    }
-
-    private void stopTracking(ChessPiece piece) {
-        trackedPieces.remove(piece);
-    }
-
-    public ChessPosition getTrackedPosition(ChessPiece.PieceType type, ChessGame.TeamColor team) {
-        for (ChessPiece piece : trackedPieces.keySet()) {
-            if (piece.getPieceType() == type && piece.getTeamColor() == team) {
-                return trackedPieces.get(piece);
+                if (piece != null && piece.getPieceType() == type && piece.getTeamColor() == team) {
+                    return new ChessPosition(
+                            BOARD_HEIGHT - i,
+                            j + 1
+                    );
+                }
             }
         }
 
         return null;
     }
 
-    public Collection<Map.Entry<ChessPiece, ChessPosition>> getTrackedTeam(ChessGame.TeamColor team) {
-        return trackedPieces.entrySet().stream()
-                .filter(p -> p.getKey().getTeamColor() == team)
-                .toList();
+    public Collection<ChessPosition> getTeamPositions(ChessGame.TeamColor team) {
+        ArrayList<ChessPosition> positions = new ArrayList<>();
+
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                ChessPiece piece = board[i][j];
+
+                if (piece != null && piece.getTeamColor() == team) {
+                    positions.add(
+                            new ChessPosition(
+                                    BOARD_HEIGHT - i,
+                                    j + 1
+                            )
+                    );
+                }
+            }
+        }
+
+        return positions;
     }
 
     public ChessBoard() {
@@ -88,12 +100,7 @@ public class ChessBoard {
         if (isValidPosition(position)) {
             ChessPiece targetPiece = getPiece(position);
 
-            if (targetPiece != null) {
-                stopTracking(targetPiece);
-            }
-
             board[BOARD_HEIGHT - position.getRow()][position.getColumn() - 1] = piece;
-            updateTracker(piece, position);
         } else {
             throw new IndexOutOfBoundsException("Position is out of bounds: " + position.toString());
         }
@@ -109,7 +116,6 @@ public class ChessBoard {
             if (piece != null) {
                 board[BOARD_HEIGHT - endPosition.getRow()][endPosition.getColumn() - 1] = piece;
                 board[BOARD_HEIGHT - startPosition.getRow()][startPosition.getColumn() - 1] = null;
-                updateTracker(piece, endPosition);
             }
         } else {
             throw new IndexOutOfBoundsException("Position is out of bounds: " + endPosition.toString());
@@ -137,7 +143,6 @@ public class ChessBoard {
      */
     public void resetBoard() {
         board = new ChessPiece[BOARD_HEIGHT][BOARD_WIDTH];
-        trackedPieces.clear();
 
         for (String configuration : DEFAULT_CONFIGURATION) {
             String[] parsed = configuration.split(":");
@@ -168,7 +173,11 @@ public class ChessBoard {
     public String toString() {
         StringBuilder representation = new StringBuilder();
 
+        int rank = 1;
+
         for (ChessPiece[] row : board) {
+            representation.append(rank).append(" ");
+
             for (ChessPiece col : row) {
                 if (col == null) {
                     representation.append(".. ");
@@ -182,7 +191,11 @@ public class ChessBoard {
                 representation.append(" ");
             }
             representation.append("\n");
+
+            rank++;
         }
+
+        representation.append("  A1 B2 C3 D4 E5 F6 G7 H8");
 
         return representation.toString();
     }

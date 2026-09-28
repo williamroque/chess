@@ -94,6 +94,16 @@ public class ChessPiece {
     public boolean isValidMove(ChessBoard board, ChessMove move) {
         return pieceMoves(board, move.getStartPosition())
                 .stream()
-                .anyMatch(m -> m.getEndPosition() == move.getEndPosition());
+                .anyMatch(m -> {
+                            return m.getEndPosition().equals(move.getEndPosition());
+                        }
+                );
+    }
+
+    @Override
+    public String toString() {
+        String team = pieceColor == ChessGame.TeamColor.WHITE ? "W" : "B";
+
+        return team + type.getShorthand();
     }
 }

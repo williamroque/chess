@@ -79,7 +79,7 @@ public class ChessGame {
         ChessPiece targetPiece = board.getPiece(move.getEndPosition());
         board.movePiece(move);
 
-        boolean isSafe = !isInCheckmate(team);
+        boolean isSafe = !isInCheck(team);
 
         board.movePiece(
                 new ChessMove(
@@ -114,13 +114,13 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        ChessPosition kingPosition = board.getTrackedPosition(ChessPiece.PieceType.KING, teamColor);
+        ChessPosition kingPosition = board.find(ChessPiece.PieceType.KING, teamColor);
         TeamColor opposingTeam = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
 
-        for (Map.Entry<ChessPiece, ChessPosition> pieceEntry : board.getTrackedTeam(opposingTeam)) {
-            ChessPiece piece = pieceEntry.getKey();
-            ChessPosition piecePosition = pieceEntry.getValue();
-            ChessMove move = new ChessMove(piecePosition, kingPosition, null);
+        for (ChessPosition position : board.getTeamPositions(opposingTeam)) {
+            ChessPiece piece = board.getPiece(position);
+
+            ChessMove move = new ChessMove(position, kingPosition, null);
 
             if (piece.isValidMove(board, move)) {
                 return true;
@@ -137,10 +137,10 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        return isInCheck(teamColor) && board.getTrackedTeam(teamColor)
+        return isInCheck(teamColor) && board.getTeamPositions(teamColor)
                 .stream()
-                .allMatch(p -> p.getKey()
-                        .pieceMoves(board, p.getValue())
+                .allMatch(p -> board.getPiece(p)
+                        .pieceMoves(board, p)
                         .stream()
                         .noneMatch(m -> isMoveSafe(m, teamColor)));
     }
@@ -153,10 +153,10 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        return !isInCheck(teamColor) && board.getTrackedTeam(teamColor)
+        return !isInCheck(teamColor) && board.getTeamPositions(teamColor)
                 .stream()
-                .allMatch(p -> p.getKey()
-                        .pieceMoves(board, p.getValue())
+                .allMatch(p -> board.getPiece(p)
+                        .pieceMoves(board, p)
                         .stream()
                         .noneMatch(m -> isMoveSafe(m, teamColor)));
     }
