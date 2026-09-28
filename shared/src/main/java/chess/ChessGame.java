@@ -71,7 +71,7 @@ public class ChessGame {
 
         return piece.pieceMoves(board, startPosition)
                 .stream()
-                .filter(move -> isMoveSafe(move, teamTurn))
+                .filter(move -> isMoveSafe(move, piece.getTeamColor()))
                 .toList();
     }
 

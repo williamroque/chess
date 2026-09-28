@@ -173,7 +173,7 @@ public class ChessBoard {
     public String toString() {
         StringBuilder representation = new StringBuilder();
 
-        int rank = 1;
+        int rank = 8;
 
         for (ChessPiece[] row : board) {
             representation.append(rank).append(" ");
@@ -192,7 +192,7 @@ public class ChessBoard {
             }
             representation.append("\n");
 
-            rank++;
+            rank--;
         }
 
         representation.append("  A1 B2 C3 D4 E5 F6 G7 H8");
