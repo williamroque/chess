@@ -1,8 +1,7 @@
 package chess;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * A class that can manage a chess game, making moves on a board
@@ -13,6 +12,15 @@ import java.util.Objects;
 public class ChessGame {
     private TeamColor teamTurn = TeamColor.WHITE;
     private ChessBoard board;
+
+    private enum GameFlags {
+        DOUBLE_FORWARD,
+        WHITE_KING_MOVED,
+        BLACK_KING_MOVED;
+    }
+
+    private EnumSet<GameFlags> currentFlags = EnumSet.noneOf(GameFlags.class);
+    ChessPosition enPassantCandidate;
 
     public ChessGame() {
         board = new ChessBoard();
@@ -57,6 +65,46 @@ public class ChessGame {
         BLACK
     }
 
+    private ChessMove getEnPassantMove(ChessPiece piece, ChessPosition position) {
+        boolean isPawn = piece.getPieceType() == ChessPiece.PieceType.PAWN;
+        boolean wasDoubleForward = currentFlags.contains(GameFlags.DOUBLE_FORWARD);
+
+        if (isPawn && wasDoubleForward && enPassantCandidate != null) {
+            boolean sameRow = position.getRow() == enPassantCandidate.getRow();
+            boolean isNeighbor = Math.abs(enPassantCandidate.getColumn() - position.getColumn()) == 1;
+
+            if (sameRow && isNeighbor) {
+                int direction = piece.getTeamColor() == TeamColor.WHITE ? 1 : -1;
+
+                ChessPosition enPassantPosition = new ChessPosition(
+                        position.getRow() + direction,
+                        enPassantCandidate.getColumn()
+                );
+
+                return new ChessMove(position, enPassantPosition, null);
+            }
+        }
+
+        return null;
+    }
+
+    private boolean wasEnPassant(ChessMove move) {
+        ChessPiece piece = board.getPiece(move.getEndPosition());
+
+        if (piece != null && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            int startColumn = move.getStartPosition().getColumn();
+            int endColumn = move.getEndPosition().getColumn();
+
+            return startColumn != endColumn;
+        }
+
+        return false;
+    }
+
+    private ChessMove getCastlingMove(ChessPiece piece, ChessPosition position) {
+        return null;
+    }
+
     /**
      * Gets all valid moves for a piece at the given location
      *
@@ -69,10 +117,18 @@ public class ChessGame {
 
         if (piece == null) return null;
 
-        return piece.pieceMoves(board, startPosition)
+        ArrayList<ChessMove> moves = new ArrayList<ChessMove>(piece.pieceMoves(board, startPosition)
                 .stream()
                 .filter(move -> isMoveSafe(move, piece.getTeamColor()))
-                .toList();
+                .toList());
+
+        ChessMove enPassantMove = getEnPassantMove(piece, startPosition);
+
+        if (enPassantMove != null) {
+            moves.add(enPassantMove);
+        }
+
+        return moves;
     }
 
     private boolean isMoveSafe(ChessMove move, TeamColor team) {
@@ -93,6 +149,32 @@ public class ChessGame {
         return isSafe;
     }
 
+    private void setFlags(ChessPiece piece, ChessMove move) {
+        currentFlags.remove(GameFlags.DOUBLE_FORWARD);
+
+        switch (piece.getPieceType()) {
+            case PAWN:
+                int moveDistance = Math.abs(
+                        move.getEndPosition().getRow() - move.getStartPosition().getRow()
+                );
+
+                if (moveDistance == 2) {
+                    currentFlags.add(GameFlags.DOUBLE_FORWARD);
+                }
+
+                enPassantCandidate = move.getEndPosition();
+
+                break;
+            case KING:
+                if (piece.getTeamColor() == TeamColor.WHITE) {
+                    currentFlags.add(GameFlags.WHITE_KING_MOVED);
+                } else {
+                    currentFlags.add(GameFlags.BLACK_KING_MOVED);
+                }
+                break;
+        };
+    }
+
     /**
      * Makes a move in the chess game
      *
@@ -105,12 +187,15 @@ public class ChessGame {
         boolean moveChecks = (
                 piece != null
                         && piece.getTeamColor() == teamTurn
-                        && piece.isValidMove(board, move)
-                        && isMoveSafe(move, teamTurn)
+                        && validMoves(move.getStartPosition()).contains(move)
         );
 
         if (moveChecks) {
             board.movePiece(move);
+
+            if (wasEnPassant(move)) {
+                board.removePiece(enPassantCandidate);
+            }
 
             ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
 
@@ -118,6 +203,8 @@ public class ChessGame {
                 ChessPiece newPiece = new ChessPiece(teamTurn, promotionPiece);
                 board.addPiece(move.getEndPosition(), newPiece);
             }
+
+            setFlags(piece, move);
         } else {
             throw new InvalidMoveException();
         }

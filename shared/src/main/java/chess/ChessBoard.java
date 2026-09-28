@@ -106,6 +106,14 @@ public class ChessBoard {
         }
     }
 
+    public void removePiece(ChessPosition position) throws IndexOutOfBoundsException {
+        if (isValidPosition(position)) {
+            board[BOARD_HEIGHT - position.getRow()][position.getColumn() - 1] = null;
+        } else {
+            throw new IndexOutOfBoundsException("Position is out of bounds: " + position.toString());
+        }
+    }
+
     public void movePiece(ChessMove move) throws IndexOutOfBoundsException {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
