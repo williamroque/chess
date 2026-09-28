@@ -1,8 +1,6 @@
 package chess;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static java.lang.Integer.parseInt;
 
@@ -34,6 +32,28 @@ public class ChessBoard {
             "R", ChessPiece.PieceType.ROOK
     );
 
+    private static final Map<ChessPiece, ChessPosition> trackedPieces = new HashMap<>();
+
+    private void updateTracker(ChessPiece piece, ChessPosition position) {
+        trackedPieces.put(piece, position);
+    }
+
+    public ChessPosition getTrackedPosition(ChessPiece.PieceType type, ChessGame.TeamColor team) {
+        for (ChessPiece piece : trackedPieces.keySet()) {
+            if (piece.getPieceType() == type && piece.getTeamColor() == team) {
+                return trackedPieces.get(piece);
+            }
+        }
+
+        return null;
+    }
+
+    public Collection<Map.Entry<ChessPiece, ChessPosition>> getTrackedTeam(ChessGame.TeamColor team) {
+        return trackedPieces.entrySet().stream()
+                .filter(p -> p.getKey().getTeamColor() == team)
+                .toList();
+    }
+
     public ChessBoard() {
         board = new ChessPiece[BOARD_HEIGHT][BOARD_WIDTH];
     }
@@ -63,8 +83,29 @@ public class ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) throws IndexOutOfBoundsException {
         if (isValidPosition(position)) {
             board[BOARD_HEIGHT - position.getRow()][position.getColumn() - 1] = piece;
+            updateTracker(piece, position);
         } else {
             throw new IndexOutOfBoundsException("Position is out of bounds: " + position.toString());
+        }
+    }
+
+    /**
+     * Moves a chess piece in the chessboard
+     *
+     * @param startPosition where the piece is
+     * @param endPosition where piece will go
+     */
+    public void movePiece(ChessPosition startPosition, ChessPosition endPosition) throws IndexOutOfBoundsException {
+        if (isValidPosition(endPosition)) {
+            ChessPiece piece = getPiece(startPosition);
+
+            if (piece != null) {
+                board[BOARD_HEIGHT - endPosition.getRow()][endPosition.getColumn() - 1] = piece;
+                board[BOARD_HEIGHT - startPosition.getRow()][startPosition.getColumn() - 1] = null;
+                updateTracker(piece, endPosition);
+            }
+        } else {
+            throw new IndexOutOfBoundsException("Position is out of bounds: " + endPosition.toString());
         }
     }
 

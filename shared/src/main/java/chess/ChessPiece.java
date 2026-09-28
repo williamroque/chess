@@ -90,4 +90,10 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         return strategyRegistry.get(type).getValidMoves(myPosition, board, pieceColor);
     }
+
+    public boolean isValidMove(ChessBoard board, ChessMove move) {
+        return pieceMoves(board, move.getStartPosition())
+                .stream()
+                .anyMatch(m -> m.getEndPosition() == move.getEndPosition());
+    }
 }
