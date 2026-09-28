@@ -71,14 +71,26 @@ public class ChessGame {
 
         return piece.pieceMoves(board, startPosition)
                 .stream()
-                .filter(move -> {
-                    return true;
-                })
+                .filter(move -> isMoveSafe(move, teamTurn))
                 .toList();
     }
 
     private boolean isMoveSafe(ChessMove move, TeamColor team) {
-        return false;
+        ChessPiece targetPiece = board.getPiece(move.getEndPosition());
+        board.movePiece(move);
+
+        boolean isSafe = !isInCheckmate(team);
+
+        board.movePiece(
+                new ChessMove(
+                        move.getEndPosition(),
+                        move.getStartPosition(),
+                        null
+                )
+        );
+        board.addPiece(move.getEndPosition(), targetPiece);
+
+        return isSafe;
     }
 
     /**
@@ -88,7 +100,11 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        if (isMoveSafe(move, teamTurn)) {
+            board.movePiece(move);
+        } else {
+            throw new InvalidMoveException();
+        }
     }
 
     /**
@@ -121,7 +137,12 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return isInCheck(teamColor) && board.getTrackedTeam(teamColor)
+                .stream()
+                .allMatch(p -> p.getKey()
+                        .pieceMoves(board, p.getValue())
+                        .stream()
+                        .noneMatch(m -> isMoveSafe(m, teamColor)));
     }
 
     /**
@@ -132,7 +153,12 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return !isInCheck(teamColor) && board.getTrackedTeam(teamColor)
+                .stream()
+                .allMatch(p -> p.getKey()
+                        .pieceMoves(board, p.getValue())
+                        .stream()
+                        .noneMatch(m -> isMoveSafe(m, teamColor)));
     }
 
     /**

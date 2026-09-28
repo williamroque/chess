@@ -38,6 +38,10 @@ public class ChessBoard {
         trackedPieces.put(piece, position);
     }
 
+    private void stopTracking(ChessPiece piece) {
+        trackedPieces.remove(piece);
+    }
+
     public ChessPosition getTrackedPosition(ChessPiece.PieceType type, ChessGame.TeamColor team) {
         for (ChessPiece piece : trackedPieces.keySet()) {
             if (piece.getPieceType() == type && piece.getTeamColor() == team) {
@@ -82,6 +86,12 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) throws IndexOutOfBoundsException {
         if (isValidPosition(position)) {
+            ChessPiece targetPiece = getPiece(position);
+
+            if (targetPiece != null) {
+                stopTracking(targetPiece);
+            }
+
             board[BOARD_HEIGHT - position.getRow()][position.getColumn() - 1] = piece;
             updateTracker(piece, position);
         } else {
@@ -89,13 +99,10 @@ public class ChessBoard {
         }
     }
 
-    /**
-     * Moves a chess piece in the chessboard
-     *
-     * @param startPosition where the piece is
-     * @param endPosition where piece will go
-     */
-    public void movePiece(ChessPosition startPosition, ChessPosition endPosition) throws IndexOutOfBoundsException {
+    public void movePiece(ChessMove move) throws IndexOutOfBoundsException {
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+
         if (isValidPosition(endPosition)) {
             ChessPiece piece = getPiece(startPosition);
 
@@ -130,6 +137,7 @@ public class ChessBoard {
      */
     public void resetBoard() {
         board = new ChessPiece[BOARD_HEIGHT][BOARD_WIDTH];
+        trackedPieces.clear();
 
         for (String configuration : DEFAULT_CONFIGURATION) {
             String[] parsed = configuration.split(":");
@@ -154,5 +162,28 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(board);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder representation = new StringBuilder();
+
+        for (ChessPiece[] row : board) {
+            for (ChessPiece col : row) {
+                if (col == null) {
+                    representation.append(".. ");
+                    continue;
+                }
+
+                representation.append(
+                        col.getTeamColor() == ChessGame.TeamColor.BLACK ? "B" : "W"
+                );
+                representation.append(col.getPieceType().getShorthand());
+                representation.append(" ");
+            }
+            representation.append("\n");
+        }
+
+        return representation.toString();
     }
 }
