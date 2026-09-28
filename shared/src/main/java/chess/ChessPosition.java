@@ -22,7 +22,7 @@ public class ChessPosition {
      * 1 codes for the bottom row
      */
     public int getRow() {
-        return row;
+        return this.row;
     }
 
     /**
@@ -30,7 +30,7 @@ public class ChessPosition {
      * 1 codes for the left column
      */
     public int getColumn() {
-        return col;
+        return this.col;
     }
 
     @Override
@@ -49,6 +49,6 @@ public class ChessPosition {
 
     @Override
     public String toString() {
-        return "(" + row + ", " + col + ")";
+        return "(" + this.row + ", " + this.col + ")";
     }
 }

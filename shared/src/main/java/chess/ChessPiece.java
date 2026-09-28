@@ -15,39 +15,26 @@ import java.util.Objects;
 public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
     private final ChessPiece.PieceType type;
-    private final String shorthand;
 
-    private final Map<ChessPiece.PieceType, ChessStrategy> strategyRegistry = Map.of(
+    private static final Map<ChessPiece.PieceType, ChessStrategy> strategyRegistry = Map.of(
             PieceType.BISHOP, new BishopStrategy(),
             PieceType.KING, new KingStrategy(),
             PieceType.KNIGHT, new KnightStrategy(),
             PieceType.PAWN, new PawnStrategy(),
-            PieceType.ROOK, new RookStrategy(),
-            PieceType.QUEEN, new QueenStrategy()
+            PieceType.QUEEN, new QueenStrategy(),
+            PieceType.ROOK, new RookStrategy()
     );
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
-        this.shorthand = String.valueOf(type.name().charAt(0));
-    }
-
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type, String shorthand) {
-        this.pieceColor = pieceColor;
-        this.type = type;
-        this.shorthand = shorthand;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (!(o instanceof ChessPiece)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         ChessPiece that = (ChessPiece) o;
         return pieceColor == that.pieceColor && type == that.type;
     }
@@ -57,24 +44,26 @@ public class ChessPiece {
         return Objects.hash(pieceColor, type);
     }
 
-    @Override
-    public String toString() {
-        return "ChessPiece{" +
-                "pieceColor=" + pieceColor +
-                ", type=" + type +
-                '}';
-    }
-
     /**
      * The various different chess piece options
      */
     public enum PieceType {
-        KING,
-        QUEEN,
-        BISHOP,
-        KNIGHT,
-        ROOK,
-        PAWN
+        KING("K"),
+        QUEEN("Q"),
+        BISHOP("B"),
+        KNIGHT("N"),
+        ROOK("R"),
+        PAWN("P");
+
+        private final String shorthand;
+
+        PieceType(String s) {
+            this.shorthand = s;
+        }
+
+        public String getShorthand() {
+            return this.shorthand;
+        }
     }
 
     /**
@@ -92,13 +81,6 @@ public class ChessPiece {
     }
 
     /**
-     * @return the piece shorthand notation
-     */
-    public String getShorthand() {
-        return this.shorthand;
-    }
-
-    /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
      * danger
@@ -106,7 +88,6 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ChessStrategy strategy = strategyRegistry.get(this.type);
-        return strategy.getValidMoves(myPosition, board, pieceColor);
+        return strategyRegistry.get(this.type).getValidMoves(myPosition, board, this.pieceColor);
     }
 }
