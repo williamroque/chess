@@ -16,7 +16,11 @@ public class ChessGame {
     private enum GameFlags {
         DOUBLE_FORWARD,
         WHITE_KING_MOVED,
-        BLACK_KING_MOVED;
+        BLACK_KING_MOVED,
+        WHITE_QUEENSIDE_ROOK_MOVED,
+        BLACK_QUEENSIDE_ROOK_MOVED,
+        WHITE_KINGSIDE_ROOK_MOVED,
+        BLACK_KINGSIDE_ROOK_MOVED;
     }
 
     private EnumSet<GameFlags> currentFlags = EnumSet.noneOf(GameFlags.class);
@@ -101,8 +105,78 @@ public class ChessGame {
         return false;
     }
 
-    private ChessMove getCastlingMove(ChessPiece piece, ChessPosition position) {
-        return null;
+    private ArrayList<ChessMove> getCastlingMoves(ChessPiece piece, ChessPosition position) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
+
+        boolean isKing = piece.getPieceType() == ChessPiece.PieceType.KING;
+        boolean kingHasNotMoved = (
+                position.getColumn() == 5 &&
+                piece.getTeamColor() == TeamColor.WHITE
+                        && !currentFlags.contains(GameFlags.WHITE_KING_MOVED)
+                        && position.getRow() == 1
+                || piece.getTeamColor() == TeamColor.BLACK
+                        && !currentFlags.contains(GameFlags.BLACK_KING_MOVED)
+                        && position.getRow() == 8
+        );
+        boolean isInCheck = isInCheck(piece.getTeamColor());
+
+        if (isKing && kingHasNotMoved && !isInCheck) {
+            int[][] offsets = {{-1, -2, -3}, {1, 2}};
+
+            for (int[] side : offsets) {
+                boolean rookHasMoved = (
+                        piece.getTeamColor() == TeamColor.WHITE
+                                && (side[0] < 0 && currentFlags.contains(GameFlags.WHITE_QUEENSIDE_ROOK_MOVED)
+                                || side[0] > 0 && currentFlags.contains(GameFlags.WHITE_KINGSIDE_ROOK_MOVED))
+                        || piece.getTeamColor() == TeamColor.BLACK
+                                && (side[0] < 0 && currentFlags.contains(GameFlags.BLACK_QUEENSIDE_ROOK_MOVED)
+                                || side[0] > 0 && currentFlags.contains(GameFlags.BLACK_KINGSIDE_ROOK_MOVED))
+                );
+
+                if (rookHasMoved) continue;
+
+                boolean canCastle = true;
+
+                for (int offset : side) {
+                    ChessPosition newPosition = new ChessPosition(position.getRow(), position.getColumn() + offset);
+                    ChessMove newMove = new ChessMove(position, newPosition, null);
+
+                    if (!board.isValidPosition(newPosition)) continue;
+
+                    boolean isEmpty = board.getPiece(newPosition) == null;
+                    boolean isSafe = Math.abs(offset) >= 3 || isMoveSafe(newMove, piece.getTeamColor());
+
+                    if (!isSafe || !isEmpty) {
+                        canCastle = false;
+                        break;
+                    }
+                }
+
+                if (canCastle) {
+                    int offset = side[0] < 0 ? -2 : 2;
+
+                    ChessPosition kingPosition = new ChessPosition(position.getRow(), position.getColumn() + offset);
+
+                    ChessMove move = new ChessMove(position, kingPosition, null);
+                    moves.add(move);
+                }
+            }
+        }
+
+       return moves;
+    }
+
+    private boolean wasCastling(ChessMove move) {
+        ChessPiece piece = board.getPiece(move.getEndPosition());
+
+        if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING) {
+            int startColumn = move.getStartPosition().getColumn();
+            int endColumn = move.getEndPosition().getColumn();
+
+            return Math.abs(startColumn - endColumn) == 2;
+        }
+
+        return false;
     }
 
     /**
@@ -127,6 +201,10 @@ public class ChessGame {
         if (enPassantMove != null) {
             moves.add(enPassantMove);
         }
+
+        ArrayList<ChessMove> castlingMoves = getCastlingMoves(piece, startPosition);
+
+        moves.addAll(castlingMoves);
 
         return moves;
     }
@@ -172,6 +250,21 @@ public class ChessGame {
                     currentFlags.add(GameFlags.BLACK_KING_MOVED);
                 }
                 break;
+            case ROOK:
+                if (piece.getTeamColor() == TeamColor.WHITE) {
+                    if (move.getStartPosition().getColumn() == 1) {
+                        currentFlags.add(GameFlags.WHITE_QUEENSIDE_ROOK_MOVED);
+                    } else if (move.getStartPosition().getColumn() == 8) {
+                        currentFlags.add(GameFlags.WHITE_KINGSIDE_ROOK_MOVED);
+                    }
+                } else {
+                    if (move.getStartPosition().getColumn() == 1) {
+                        currentFlags.add(GameFlags.BLACK_QUEENSIDE_ROOK_MOVED);
+                    } else if (move.getStartPosition().getColumn() == 8) {
+                        currentFlags.add(GameFlags.BLACK_KINGSIDE_ROOK_MOVED);
+                    }
+                }
+                break;
         };
     }
 
@@ -197,6 +290,11 @@ public class ChessGame {
                 board.removePiece(enPassantCandidate);
             }
 
+            if (wasCastling(move)) {
+                ChessMove rookMove = getRookCastlingMove(move);
+                board.movePiece(rookMove);
+            }
+
             ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
 
             if (promotionPiece != null) {
@@ -210,6 +308,25 @@ public class ChessGame {
         }
 
         teamTurn = teamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+    }
+
+    private static ChessMove getRookCastlingMove(ChessMove move) {
+        int startRow = move.getStartPosition().getRow();
+        int startCol = move.getStartPosition().getColumn();
+        int endCol = move.getEndPosition().getColumn();
+
+        ChessPosition rookStartPosition;
+        ChessPosition rookEndPosition;
+
+        if (endCol < startCol) {
+            rookStartPosition = new ChessPosition(startRow, 1);
+            rookEndPosition = new ChessPosition(startRow, 4);
+        } else {
+            rookStartPosition = new ChessPosition(startRow, 8);
+            rookEndPosition = new ChessPosition(startRow, 6);
+        }
+
+        return new ChessMove(rookStartPosition, rookEndPosition, null);
     }
 
     /**
