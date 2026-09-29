@@ -133,7 +133,9 @@ public class ChessGame {
                                 || side[0] > 0 && currentFlags.contains(GameFlags.BLACK_KINGSIDE_ROOK_MOVED))
                 );
 
-                if (rookHasMoved) continue;
+                if (rookHasMoved) {
+                    continue;
+                }
 
                 boolean canCastle = true;
 
@@ -141,7 +143,9 @@ public class ChessGame {
                     ChessPosition newPosition = new ChessPosition(position.getRow(), position.getColumn() + offset);
                     ChessMove newMove = new ChessMove(position, newPosition, null);
 
-                    if (!board.isValidPosition(newPosition)) continue;
+                    if (!board.isValidPosition(newPosition)) {
+                        continue;
+                    }
 
                     boolean isEmpty = board.getPiece(newPosition) == null;
                     boolean isSafe = Math.abs(offset) >= 3 || isMoveSafe(newMove, piece.getTeamColor());
@@ -189,7 +193,9 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
 
-        if (piece == null) return null;
+        if (piece == null) {
+            return null;
+        }
 
         ArrayList<ChessMove> moves = new ArrayList<ChessMove>(piece.pieceMoves(board, startPosition)
                 .stream()
