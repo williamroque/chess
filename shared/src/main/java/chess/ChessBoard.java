@@ -23,7 +23,7 @@ public class ChessBoard {
             "W:R:a1", "W:N:b1", "W:B:c1", "W:Q:d1", "W:K:e1", "W:B:f1", "W:N:g1", "W:R:h1"
     };
 
-    private static final Map<String, ChessPiece.PieceType> pieceRegistry = Map.of(
+    private static final Map<String, ChessPiece.PieceType> PIECE_REGISTRY = Map.of(
             "B", ChessPiece.PieceType.BISHOP,
             "K", ChessPiece.PieceType.KING,
             "N", ChessPiece.PieceType.KNIGHT,
@@ -156,7 +156,7 @@ public class ChessBoard {
             String[] parsed = configuration.split(":");
 
             ChessGame.TeamColor team = parsed[0].equals("W") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-            ChessPiece.PieceType type = pieceRegistry.get(parsed[1]);
+            ChessPiece.PieceType type = PIECE_REGISTRY.get(parsed[1]);
             ChessPosition position = algebraicToMatrix(parsed[2]);
 
             addPiece(position, new ChessPiece(team, type));

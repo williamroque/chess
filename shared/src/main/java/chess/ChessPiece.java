@@ -16,7 +16,7 @@ public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
     private final ChessPiece.PieceType type;
 
-    private static final Map<ChessPiece.PieceType, ChessStrategy> strategyRegistry = Map.of(
+    private static final Map<ChessPiece.PieceType, ChessStrategy> STRATEGY_REGISTRY = Map.of(
             PieceType.BISHOP, new BishopStrategy(),
             PieceType.KING, new KingStrategy(),
             PieceType.KNIGHT, new KnightStrategy(),
@@ -88,7 +88,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return strategyRegistry.get(type).getValidMoves(myPosition, board, pieceColor);
+        return STRATEGY_REGISTRY.get(type).getValidMoves(myPosition, board, pieceColor);
     }
 
     public boolean isValidMove(ChessBoard board, ChessMove move) {
