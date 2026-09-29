@@ -26,7 +26,9 @@ public interface ChessStrategy {
                     );
                 }
 
-                if (targetPiece != null) break;
+                if (targetPiece != null) {
+                    break;
+                }
 
                 scalar++;
                 positionCandidate = new ChessPosition(
@@ -51,7 +53,9 @@ public interface ChessStrategy {
                     col + offset[1]
             );
 
-            if (!board.isValidPosition(positionCandidate)) continue;
+            if (!board.isValidPosition(positionCandidate)) {
+                continue;
+            }
 
             ChessPiece targetPiece = board.getPiece(positionCandidate);
 
