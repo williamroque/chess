@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import dataaccess.exceptions.AlreadyTakenException;
 import dataaccess.UserDAO;
+import dataaccess.exceptions.AuthTokenNotFoundException;
 import dataaccess.exceptions.InvalidCredentialsException;
 import model.AuthData;
 import model.UserData;
@@ -48,7 +49,11 @@ public class UserService {
         return new LoginResult(user.username(), auth.authToken());
     }
 
-    public void logout(String authToken) {
+    public void logout(String authToken) throws AuthTokenNotFoundException {
+        if (!userDAO.authExists(authToken)) {
+            throw new AuthTokenNotFoundException("Auth token not found or invalid.");
+        }
 
+        userDAO.deleteAuth(authToken);
     }
 }

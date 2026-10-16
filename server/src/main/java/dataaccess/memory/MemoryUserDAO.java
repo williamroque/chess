@@ -32,17 +32,17 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public boolean authExists(AuthData auth) {
-        return auths.containsKey(auth.authToken());
+    public boolean authExists(String authToken) {
+        return auths.containsKey(authToken);
     }
 
     @Override
-    public void deleteAuth(AuthData auth) throws AuthTokenNotFoundException {
-        if (!authExists(auth)) {
+    public void deleteAuth(String authToken) throws AuthTokenNotFoundException {
+        if (!authExists(authToken)) {
             throw new AuthTokenNotFoundException("The provided username-token pair does not exist.");
         }
 
-        auths.remove(auth.authToken());
+        auths.remove(authToken);
     }
 
     @Override

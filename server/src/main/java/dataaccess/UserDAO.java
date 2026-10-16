@@ -10,8 +10,8 @@ public interface UserDAO {
     void createUser(UserData user) throws AlreadyTakenException;
 
     void createAuth(AuthData auth);
-    boolean authExists(AuthData auth);
-    void deleteAuth(AuthData auth) throws AuthTokenNotFoundException;
+    boolean authExists(String authToken);
+    void deleteAuth(String authToken) throws AuthTokenNotFoundException;
 
     void clear();
 }
