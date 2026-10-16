@@ -1,5 +1,5 @@
 package dataaccess;
 
-public interface ApplicationDAO {
+public interface AppDAO {
     void clear();
 }
