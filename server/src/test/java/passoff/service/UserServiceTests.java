@@ -1,6 +1,7 @@
 package passoff.service;
 
 import dataaccess.exceptions.AlreadyTakenException;
+import dataaccess.exceptions.AuthTokenNotFoundException;
 import dataaccess.exceptions.InvalidCredentialsException;
 import dataaccess.memory.MemoryAppDAO;
 import dataaccess.memory.MemoryGameDAO;
@@ -234,5 +235,49 @@ public class UserServiceTests {
 
         Assertions.assertEquals(dummyUser.username(), result.username());
         Assertions.assertFalse(result.authToken().isBlank());
+    }
+
+    /*
+     * ==== User Logout Tests ====
+     * */
+
+    @Test
+    @Order(10)
+    @DisplayName("Test if missing auth token throws exception")
+    public void testLogoutMissingAuthTokenException() {
+        Assertions.assertTrue(userDAO._getUsers().isEmpty());
+        Assertions.assertTrue(userDAO._getAuths().isEmpty());
+
+        populateDummyUsers();
+        populateDummyAuths();
+
+        String dummyAuthToken = "INVALID-TOKEN";
+
+        Assertions.assertThrows(AuthTokenNotFoundException.class, () -> {
+            userService.logout(dummyAuthToken);
+        });
+    }
+
+    @Test
+    @Order(10)
+    @DisplayName("Test if logout deletes auth token")
+    public void testLogoutDeletesAuthToken() {
+        Assertions.assertTrue(userDAO._getUsers().isEmpty());
+        Assertions.assertTrue(userDAO._getAuths().isEmpty());
+
+        populateDummyUsers();
+        populateDummyAuths();
+
+        Assertions.assertEquals(3, userDAO._getAuths().size());
+
+        String dummyAuthToken = "1234-4312-1234-0175";
+
+        try {
+            userService.logout(dummyAuthToken);
+        } catch (Exception _) {
+
+        }
+
+        Assertions.assertEquals(2, userDAO._getAuths().size());
     }
 }
