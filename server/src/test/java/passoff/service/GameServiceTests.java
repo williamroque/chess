@@ -16,6 +16,7 @@ import service.GameService;
 import service.UserService;
 import service.results.LoginResult;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,7 +65,7 @@ public class GameServiceTests {
         userDAO._setAuths(dummyAuths);
     }
 
-    private void populateDummyGames() {
+    private HashMap<Integer, GameData> populateDummyGames() {
         HashMap<Integer, GameData> dummyGames = new HashMap<>(Map.of(
                 0, new GameData(
                         0,
@@ -89,9 +90,41 @@ public class GameServiceTests {
                 )
         ));
         gameDAO._setGames(dummyGames);
+
+        return dummyGames;
     }
 
     /*
      * ==== Game List Tests ====
      * */
+
+    @Test
+    @Order(1)
+    @DisplayName("Test auth token not found on game list")
+    public void testGameListAuthNotFound() {
+        populateDummyUsers();
+        populateDummyAuths();
+        populateDummyGames();
+
+        String dummyAuthToken = "INVALID-TOKEN";
+
+        Assertions.assertThrows(AuthTokenNotFoundException.class, () -> {
+            gameService.listGames(dummyAuthToken);
+        });
+    }
+
+    @Test
+    @Order(2)
+    @DisplayName("Test game list returns correctly")
+    public void testGameListReturnsCorrectly() {
+        populateDummyUsers();
+        populateDummyAuths();
+        HashMap<Integer, GameData> dummyGames = populateDummyGames();
+
+        String dummyAuthToken = "1234-4312-1234-0175";
+
+        Collection<GameData> gameList = gameService.listGames(dummyAuthToken);
+
+        Assertions.assertEquals(dummyGames.values(), gameList);
+    }
 }
