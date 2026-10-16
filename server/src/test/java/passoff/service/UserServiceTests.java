@@ -83,7 +83,11 @@ public class UserServiceTests {
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
 
-        userService.register(dummyUser);
+        try {
+            userService.register(dummyUser);
+        } catch (Exception _) {
+
+        }
 
         Assertions.assertEquals(1, userDAO._getUsers().size());
         Assertions.assertEquals(dummyUser, userDAO._getUsers().values().toArray()[0]);
@@ -97,7 +101,11 @@ public class UserServiceTests {
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
 
-        userService.register(dummyUser);
+        try {
+            userService.register(dummyUser);
+        } catch (Exception _) {
+
+        }
 
         Assertions.assertEquals(1, userDAO._getAuths().size());
     }
@@ -110,7 +118,11 @@ public class UserServiceTests {
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
 
-        userService.register(dummyUser);
+        try {
+            userService.register(dummyUser);
+        } catch (Exception _) {
+
+        }
 
         Assertions.assertThrows(AlreadyTakenException.class, () -> {
             userService.register(dummyUser);
@@ -125,7 +137,13 @@ public class UserServiceTests {
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
 
-        LoginResult result = userService.register(dummyUser);
+        LoginResult result = new LoginResult(null, null);
+
+        try {
+            result = userService.register(dummyUser);
+        } catch (Exception _) {
+
+        }
 
         Assertions.assertEquals(dummyUser.username(), result.username());
         Assertions.assertFalse(result.authToken().isBlank());
