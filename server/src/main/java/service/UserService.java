@@ -2,7 +2,7 @@ package service;
 
 import java.util.UUID;
 
-import dataaccess.AlreadyTakenException;
+import dataaccess.exceptions.AlreadyTakenException;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;

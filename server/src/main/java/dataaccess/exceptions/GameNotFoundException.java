@@ -1,6 +1,6 @@
-package dataaccess;
+package dataaccess.exceptions;
 
-public class GameNotFoundException extends Exception{
+public class GameNotFoundException extends DataAccessException {
     public GameNotFoundException(String message) {
         super(message);
     }

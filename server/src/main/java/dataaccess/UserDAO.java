@@ -1,5 +1,7 @@
 package dataaccess;
 
+import dataaccess.exceptions.AlreadyTakenException;
+import dataaccess.exceptions.AuthTokenNotFoundException;
 import model.AuthData;
 import model.UserData;
 

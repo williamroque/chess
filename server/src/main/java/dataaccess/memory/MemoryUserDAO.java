@@ -1,7 +1,7 @@
 package dataaccess.memory;
 
-import dataaccess.AlreadyTakenException;
-import dataaccess.AuthTokenNotFoundException;
+import dataaccess.exceptions.AlreadyTakenException;
+import dataaccess.exceptions.AuthTokenNotFoundException;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;

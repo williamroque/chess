@@ -2,7 +2,7 @@ package dataaccess.memory;
 
 import chess.ChessGame;
 import dataaccess.GameDAO;
-import dataaccess.GameNotFoundException;
+import dataaccess.exceptions.GameNotFoundException;
 import model.GameData;
 
 import java.util.Collection;

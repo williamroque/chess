@@ -1,6 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
+import dataaccess.exceptions.GameNotFoundException;
 import model.GameData;
 
 import java.util.Collection;
