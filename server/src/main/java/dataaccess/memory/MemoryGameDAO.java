@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class MemoryGameDAO implements GameDAO {
-    HashMap<Integer, GameData> games;
+    HashMap<Integer, GameData> games = new HashMap<>();
 
     @Override
     public Collection<GameData> getGameList() {
@@ -50,5 +50,13 @@ public class MemoryGameDAO implements GameDAO {
     @Override
     public void clear() {
         games.clear();
+    }
+
+    public HashMap<Integer, GameData> _getGames() {
+        return games;
+    }
+
+    public void _setGames(HashMap<Integer, GameData> games) {
+        this.games = games;
     }
 }

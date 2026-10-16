@@ -3,6 +3,8 @@ package dataaccess;
 import model.AuthData;
 import model.UserData;
 
+import java.util.HashMap;
+
 public interface UserDAO {
     UserData getUser(String username);
     void createUser(UserData user) throws AlreadyTakenException;
