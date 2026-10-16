@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class UserServiceTests {
+public class AppUserServiceTests {
     private static MemoryUserDAO userDAO;
     private static MemoryGameDAO gameDAO;
     private static MemoryAppDAO appDAO;
