@@ -1,0 +1,54 @@
+package dataaccess.memory;
+
+import chess.ChessGame;
+import dataaccess.GameDAO;
+import dataaccess.GameNotFoundException;
+import model.GameData;
+
+import java.util.Collection;
+import java.util.HashMap;
+
+public class MemoryGameDAO implements GameDAO {
+    HashMap<Integer, GameData> games;
+
+    @Override
+    public Collection<GameData> getGameList() {
+        return games.values();
+    }
+
+    @Override
+    public GameData getGame(int gameID) {
+        return games.get(gameID);
+    }
+
+    @Override
+    public int createGame(String gameName, ChessGame game) {
+        int gameID = games.size();
+
+        GameData data = new GameData(
+                gameID,
+                null,
+                null,
+                gameName,
+                game
+        );
+
+        games.put(gameID, data);
+
+        return gameID;
+    }
+
+    @Override
+    public void updateGame(GameData game) throws GameNotFoundException {
+        if (getGame(game.gameID()) == null) {
+            throw new GameNotFoundException("Game with the specified ID does not exist.");
+        }
+
+        games.put(game.gameID(), game);
+    }
+
+    @Override
+    public void clear() {
+        games.clear();
+    }
+}
