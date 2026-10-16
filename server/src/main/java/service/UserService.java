@@ -11,15 +11,15 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-    LoginResult register(UserData user) {
+    public LoginResult register(UserData user) {
         return new LoginResult(null, null);
     }
 
-    LoginResult login(UserData user) {
+    public LoginResult login(UserData user) {
         return new LoginResult(null, null);
     }
 
-    void logout(String authToken) {
+    public void logout(String authToken) {
 
     }
 }

@@ -1,5 +1,6 @@
 package passoff.service;
 
+import dataaccess.AlreadyTakenException;
 import dataaccess.AppDAO;
 import dataaccess.GameDAO;
 import dataaccess.UserDAO;
@@ -13,6 +14,7 @@ import passoff.model.*;
 import service.AppService;
 import service.GameService;
 import service.UserService;
+import service.results.LoginResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,5 +73,61 @@ public class UserServiceTests {
 
         Assertions.assertTrue(userDAO._getUsers().isEmpty());
         Assertions.assertTrue(userDAO._getAuths().isEmpty());
+    }
+
+    @Test
+    @Order(2)
+    @DisplayName("Test registering new user to see if actually created")
+    public void testRegisteringCreatesUsers() {
+        Assertions.assertTrue(userDAO._getUsers().isEmpty());
+
+        UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
+
+        userService.register(dummyUser);
+
+        Assertions.assertEquals(1, userDAO._getUsers().size());
+        Assertions.assertEquals(dummyUser, userDAO._getUsers().values().toArray()[0]);
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("Test registering new user to see if auth created")
+    public void testRegisteringCreatesAuth() {
+        Assertions.assertTrue(userDAO._getAuths().isEmpty());
+
+        UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
+
+        userService.register(dummyUser);
+
+        Assertions.assertEquals(1, userDAO._getAuths().size());
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("Test user already exists exception during registration")
+    public void testRegisteringThrowsAlreadyExists() {
+        Assertions.assertTrue(userDAO._getUsers().isEmpty());
+
+        UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
+
+        userService.register(dummyUser);
+
+        Assertions.assertThrows(AlreadyTakenException.class, () -> {
+            userService.register(dummyUser);
+        });
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("Test if registering return reasonable login results")
+    public void testRegisteringReturnsReasonableResults() {
+        Assertions.assertTrue(userDAO._getUsers().isEmpty());
+
+        UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
+
+        LoginResult result = userService.register(dummyUser);
+
+        Assertions.assertEquals(dummyUser.username(), result.username());
+        Assertions.assertFalse(result.authToken().isBlank());
     }
 }
