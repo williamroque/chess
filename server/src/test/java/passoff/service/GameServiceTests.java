@@ -1,10 +1,7 @@
 package passoff.service;
 
 import chess.ChessGame;
-import dataaccess.exceptions.AlreadyTakenException;
-import dataaccess.exceptions.AuthTokenNotFoundException;
-import dataaccess.exceptions.InvalidCredentialsException;
-import dataaccess.exceptions.InvalidGameNameException;
+import dataaccess.exceptions.*;
 import dataaccess.memory.MemoryAppDAO;
 import dataaccess.memory.MemoryGameDAO;
 import dataaccess.memory.MemoryUserDAO;
@@ -220,5 +217,87 @@ public class GameServiceTests {
         }
 
         Assertions.assertEquals(dummyData, data);
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("Test join game auth token not found")
+    public void testJoinGameAuthNotFound() {
+        populateDummyUsers();
+        populateDummyAuths();
+        populateDummyGames();
+
+        String dummyAuthToken = "INVALID-TOKEN";
+        int dummyID = 0;
+        ChessGame.TeamColor dummyTeam = ChessGame.TeamColor.WHITE;
+
+        Assertions.assertThrows(AuthTokenNotFoundException.class, () -> {
+            gameService.joinGame(dummyAuthToken, dummyID, dummyTeam);
+        });
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("Test join game game ID not found")
+    public void testJoinGameIDNotFound() {
+        populateDummyUsers();
+        populateDummyAuths();
+        populateDummyGames();
+
+        String dummyAuthToken = "1234-4312-1234-0175";
+        int dummyID = 5;
+        ChessGame.TeamColor dummyTeam = ChessGame.TeamColor.WHITE;
+
+        Assertions.assertThrows(GameNotFoundException.class, () -> {
+            gameService.joinGame(dummyAuthToken, dummyID, dummyTeam);
+        });
+    }
+
+    @Test
+    @Order(8)
+    @DisplayName("Test join game with already taken team color")
+    public void testJoinGameAlreadyTakenTeam() {
+        populateDummyUsers();
+        populateDummyAuths();
+        populateDummyGames();
+
+        String dummyAuthToken = "1234-4312-1234-0175";
+        int dummyID = 0;
+        ChessGame.TeamColor dummyTeam = ChessGame.TeamColor.WHITE;
+
+        try {
+            gameService.joinGame(dummyAuthToken, dummyID, dummyTeam);
+        } catch(Exception _) {
+
+        }
+
+        Assertions.assertThrows(AlreadyTakenException.class, () -> {
+            gameService.joinGame(dummyAuthToken, dummyID, dummyTeam);
+        });
+    }
+
+    @Test
+    @Order(9)
+    @DisplayName("Test join game updates game")
+    public void testJoinGameUpdatesGame() {
+        populateDummyUsers();
+        populateDummyAuths();
+        populateDummyGames();
+
+        String dummyAuthToken = "1234-4312-1234-0175";
+        String dummyUsername = "johnny";
+
+        int dummyID = 2;
+        ChessGame.TeamColor dummyTeam = ChessGame.TeamColor.WHITE;
+
+        Assertions.assertNull(gameDAO.getGame(dummyID).whiteUsername());
+
+        try {
+            gameService.joinGame(dummyAuthToken, dummyID, dummyTeam);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        Assertions.assertEquals(dummyUsername, gameDAO.getGame(dummyID).whiteUsername());
     }
 }
