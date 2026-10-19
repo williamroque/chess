@@ -1,6 +1,7 @@
 package handler;
 
 import dataaccess.exceptions.AlreadyTakenException;
+import dataaccess.exceptions.AuthTokenNotFoundException;
 import dataaccess.exceptions.InvalidCredentialsException;
 import io.javalin.http.Context;
 import model.UserData;
@@ -78,26 +79,13 @@ public class UserHandler extends Handler {
     }
 
     public void logout(Context ctx) {
-        UserData userData;
+        String authToken = ctx.header("authorization");
 
         try {
-            userData = getBodyObject(ctx, UserData.class);
-
-            if (userData.username() == null || userData.password() == null) {
-                throw new InvalidRequestException("Bad request.");
-            }
-        } catch (InvalidRequestException _) {
-            ctx.status(400);
-            ctx.json("{ \"message\": \"Error: bad request\" }");
-
-            return;
-        }
-
-        try {
-            LoginResult result = userService.login(userData);
+            userService.logout(authToken);
             ctx.status(200);
-            ctx.json(result);
-        } catch(InvalidCredentialsException _) {
+            ctx.json("{}");
+        } catch(AuthTokenNotFoundException _) {
             ctx.status(401);
             ctx.json("{ \"message\": \"Error: unauthorized\" }");
         } catch (Exception e) {

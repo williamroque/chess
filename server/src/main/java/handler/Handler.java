@@ -12,17 +12,6 @@ public class Handler {
         this.userService = userService;
     }
 
-//   protected boolean authorized(Context ctx) {
-//        String authToken = ctx.header("Authorization");
-//        if (!validTokens.contains(authToken)) {
-//            ctx.contentType("application/json");
-//            ctx.status(401);
-//            ctx.result(new Gson().toJson(Map.of("msg", "invalid authorization")));
-//            return false;
-//        }
-//        return true;
-//    }
-
     protected static <T> T getBodyObject(Context context, Class<T> clazz) {
         var bodyObject = new Gson().fromJson(context.body(), clazz);
 
