@@ -1,6 +1,7 @@
 package handler;
 
 import dataaccess.exceptions.AlreadyTakenException;
+import dataaccess.exceptions.InvalidCredentialsException;
 import io.javalin.http.Context;
 import model.UserData;
 import server.InvalidRequestException;
@@ -31,6 +32,9 @@ public class UserHandler {
             LoginResult result = userService.register(userData);
             ctx.status(200);
             ctx.json(result);
+        } catch(InvalidCredentialsException _) {
+            ctx.status(400);
+            ctx.json("{ \"message\": \"Error: bad request\" }");
         } catch (AlreadyTakenException _) {
             ctx.status(403);
             ctx.json("{ \"message\": \"Error: already taken\" }");

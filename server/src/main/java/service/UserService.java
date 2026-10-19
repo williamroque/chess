@@ -21,7 +21,13 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-    public LoginResult register(UserData user) throws AlreadyTakenException {
+    public LoginResult register(UserData user) throws AlreadyTakenException, InvalidCredentialsException {
+        if (user.username() == null || user.username().isBlank()
+                || user.password() == null || user.password().isBlank()
+                || user.email() == null || user.email().isBlank()) {
+            throw new InvalidCredentialsException("At least one of the provided credentials is invalid.");
+        }
+
         if (userDAO.getUser(user.username()) != null) {
             throw new AlreadyTakenException("This username already exists!");
         }
