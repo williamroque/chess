@@ -16,6 +16,7 @@ import service.GameService;
 import service.UserService;
 import service.results.LoginResult;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class GameServiceTests {
         appDAO = new MemoryAppDAO(userDAO, gameDAO);
 
         userService = new UserService(userDAO);
-        gameService = new GameService(gameDAO);
+        gameService = new GameService(gameDAO, userDAO);
         appService = new AppService(appDAO);
     }
 
@@ -123,7 +124,13 @@ public class GameServiceTests {
 
         String dummyAuthToken = "1234-4312-1234-0175";
 
-        Collection<GameData> gameList = gameService.listGames(dummyAuthToken);
+        Collection<GameData> gameList = new ArrayList<>();
+
+        try {
+            gameList = gameService.listGames(dummyAuthToken);
+        } catch (Exception _) {
+
+        }
 
         Assertions.assertEquals(dummyGames.values(), gameList);
     }

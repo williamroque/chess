@@ -35,7 +35,7 @@ public class AppUserServiceTests {
         appDAO = new MemoryAppDAO(userDAO, gameDAO);
 
         userService = new UserService(userDAO);
-        gameService = new GameService(gameDAO);
+        gameService = new GameService(gameDAO, userDAO);
         appService = new AppService(appDAO);
     }
 

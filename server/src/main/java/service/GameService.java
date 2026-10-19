@@ -2,19 +2,27 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.GameDAO;
+import dataaccess.UserDAO;
+import dataaccess.exceptions.AuthTokenNotFoundException;
 import model.GameData;
 
 import java.util.*;
 
 public class GameService {
     final GameDAO gameDAO;
+    final UserDAO userDAO;
 
-    public GameService(GameDAO gameDAO) {
+    public GameService(GameDAO gameDAO, UserDAO userDAO) {
         this.gameDAO = gameDAO;
+        this.userDAO = userDAO;
     }
 
-    public Collection<GameData> listGames(String authToken) {
-        return new ArrayList<>();
+    public Collection<GameData> listGames(String authToken) throws AuthTokenNotFoundException {
+        if (!userDAO.authExists(authToken)) {
+            throw new AuthTokenNotFoundException("Auth token not found.");
+        }
+
+        return gameDAO.getGameList();
     }
 
     public GameData createGame(String authToken, String gameName) {
