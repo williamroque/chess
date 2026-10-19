@@ -23,7 +23,7 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public GameData createGame(String gameName, ChessGame game) {
-        int gameID = games.size();
+        int gameID = games.size() + 1;
 
         GameData data = new GameData(
                 gameID,
