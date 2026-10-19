@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataaccess.GameDAO;
 import dataaccess.UserDAO;
 import dataaccess.exceptions.AuthTokenNotFoundException;
+import dataaccess.exceptions.InvalidGameNameException;
 import model.GameData;
 
 import java.util.*;
@@ -25,8 +26,18 @@ public class GameService {
         return gameDAO.getGameList();
     }
 
-    public GameData createGame(String authToken, String gameName) {
-        return new GameData(0, null, null, null, null);
+    public GameData createGame(String authToken, String gameName) throws AuthTokenNotFoundException, InvalidGameNameException {
+        if (!userDAO.authExists(authToken)) {
+            throw new AuthTokenNotFoundException("Auth token not found.");
+        }
+
+        if (gameName.isEmpty()) {
+            throw new InvalidGameNameException("Game name is invalid.");
+        }
+
+        ChessGame game = new ChessGame();
+
+        return gameDAO.createGame(gameName, game);
     }
 
     public void joinGame(String authToken, int gameID, ChessGame.TeamColor teamColor) { }

@@ -10,7 +10,7 @@ public interface GameDAO {
     Collection<GameData> getGameList();
     GameData getGame(int gameID);
 
-    int createGame(String gameName, ChessGame game);
+    GameData createGame(String gameName, ChessGame game);
 
     void updateGame(GameData game) throws GameNotFoundException;
 
