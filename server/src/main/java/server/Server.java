@@ -27,9 +27,9 @@ public class Server {
         GameService gameService = new GameService(gameDAO, userDAO);
         AppService appService = new AppService(appDAO);
 
-        AppHandler appHandler = new AppHandler(appService);
+        AppHandler appHandler = new AppHandler(appService, userService);
         UserHandler userHandler = new UserHandler(userService);
-        GameHandler gameHandler = new GameHandler(gameService);
+        GameHandler gameHandler = new GameHandler(gameService, userService);
 
         javalin = Javalin.create(config -> {
                     config.staticFiles.add("web");
@@ -37,7 +37,8 @@ public class Server {
                 })
                 .delete("/db", appHandler::clear)
                 .post("/user", userHandler::register)
-                .post("/session", userHandler::login);
+                .post("/session", userHandler::login)
+                .delete("/session", userHandler::logout);
     }
 
     public int run(int desiredPort) {
@@ -47,15 +48,5 @@ public class Server {
 
     public void stop() {
         javalin.stop();
-    }
-
-    public static <T> T getBodyObject(Context context, Class<T> clazz) {
-        var bodyObject = new Gson().fromJson(context.body(), clazz);
-
-        if (bodyObject == null) {
-            throw new InvalidRequestException("Missing required body.");
-        }
-
-        return bodyObject;
     }
 }

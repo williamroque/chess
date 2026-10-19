@@ -2,11 +2,13 @@ package handler;
 
 import io.javalin.http.Context;
 import service.AppService;
+import service.UserService;
 
-public class AppHandler {
+public class AppHandler extends Handler {
     AppService appService;
 
-    public AppHandler(AppService appService) {
+    public AppHandler(AppService appService, UserService userService) {
+        super(userService);
         this.appService = appService;
     }
 
