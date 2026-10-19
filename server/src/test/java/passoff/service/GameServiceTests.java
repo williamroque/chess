@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataaccess.exceptions.AlreadyTakenException;
 import dataaccess.exceptions.AuthTokenNotFoundException;
 import dataaccess.exceptions.InvalidCredentialsException;
+import dataaccess.exceptions.InvalidGameNameException;
 import dataaccess.memory.MemoryAppDAO;
 import dataaccess.memory.MemoryGameDAO;
 import dataaccess.memory.MemoryUserDAO;
@@ -133,5 +134,91 @@ public class GameServiceTests {
         }
 
         Assertions.assertEquals(dummyGames.values(), gameList);
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("Test create game throws on invalid token")
+    public void testCreateGameAuthTokenNotFound() {
+        populateDummyUsers();
+        populateDummyAuths();
+        populateDummyGames();
+
+        String dummyAuthToken = "INVALID-TOKEN";
+
+        Assertions.assertThrows(AuthTokenNotFoundException.class, () -> {
+            gameService.createGame(dummyAuthToken, "game");
+        });
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("Test create game throws on invalid game name")
+    public void testCreateGameInvalidGameName() {
+        populateDummyUsers();
+        populateDummyAuths();
+        populateDummyGames();
+
+        String dummyAuthToken = "1234-4312-1234-0175";
+
+        Assertions.assertThrows(InvalidGameNameException.class, () -> {
+            gameService.createGame(dummyAuthToken, "");
+        });
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("Test create game saves to DAO")
+    public void testCreateGameSavesToDAO() {
+        populateDummyUsers();
+        populateDummyAuths();
+
+        String dummyAuthToken = "1234-4312-1234-0175";
+
+        Assertions.assertEquals(0, gameDAO._getGames().size());
+
+        try {
+            gameService.createGame(dummyAuthToken, "game123");
+        } catch (Exception _) {
+
+        }
+
+        Assertions.assertEquals(1, gameDAO._getGames().size());
+    }
+
+    @Test
+    @Order(6)
+    @DisplayName("Test create game returns valid game")
+    public void testCreateGameReturnsValidGame() {
+        populateDummyUsers();
+        populateDummyAuths();
+
+        String dummyAuthToken = "1234-4312-1234-0175";
+
+        Assertions.assertEquals(0, gameDAO._getGames().size());
+
+        GameData dummyData = new GameData(
+                0,
+                null,
+                null,
+                "game123",
+                new ChessGame()
+        );
+
+        GameData data = new GameData(
+                0,
+                null,
+                null,
+                null,
+                null
+        );
+
+        try {
+            data = gameService.createGame(dummyAuthToken, "game123");
+        } catch (Exception _) {
+
+        }
+
+        Assertions.assertEquals(dummyData, data);
     }
 }
