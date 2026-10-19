@@ -21,6 +21,10 @@ public class UserHandler {
 
         try {
             userData = Server.getBodyObject(ctx, UserData.class);
+
+            if (userData.username() == null || userData.password() == null || userData.email() == null) {
+                throw new InvalidRequestException("Bad request.");
+            }
         } catch (InvalidRequestException _) {
             ctx.status(400);
             ctx.json("{ \"message\": \"Error: bad request\" }");
@@ -38,6 +42,36 @@ public class UserHandler {
         } catch (AlreadyTakenException _) {
             ctx.status(403);
             ctx.json("{ \"message\": \"Error: already taken\" }");
+        } catch (Exception e) {
+            System.err.println(e);
+            ctx.status(500);
+            ctx.json("{ \"message\": \"Error: server error\" }");
+        }
+    }
+
+    public void login(Context ctx) {
+        UserData userData;
+
+        try {
+            userData = Server.getBodyObject(ctx, UserData.class);
+
+            if (userData.username() == null || userData.password() == null) {
+                throw new InvalidRequestException("Bad request.");
+            }
+        } catch (InvalidRequestException _) {
+            ctx.status(400);
+            ctx.json("{ \"message\": \"Error: bad request\" }");
+
+            return;
+        }
+
+        try {
+            LoginResult result = userService.login(userData);
+            ctx.status(200);
+            ctx.json(result);
+        } catch(InvalidCredentialsException _) {
+            ctx.status(401);
+            ctx.json("{ \"message\": \"Error: unauthorized\" }");
         } catch (Exception e) {
             System.err.println(e);
             ctx.status(500);

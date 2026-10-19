@@ -36,7 +36,8 @@ public class Server {
                     config.jsonMapper(new JavalinGson());
                 })
                 .delete("/db", appHandler::clear)
-                .post("/user", userHandler::register);
+                .post("/user", userHandler::register)
+                .post("/session", userHandler::login);
     }
 
     public int run(int desiredPort) {
