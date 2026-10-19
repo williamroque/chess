@@ -7,6 +7,7 @@ import model.UserData;
 
 public interface UserDAO {
     UserData getUser(String username);
+    String getUsernameByToken(String username);
     void createUser(UserData user) throws AlreadyTakenException;
 
     void createAuth(AuthData auth);

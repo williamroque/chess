@@ -3,7 +3,9 @@ package service;
 import chess.ChessGame;
 import dataaccess.GameDAO;
 import dataaccess.UserDAO;
+import dataaccess.exceptions.AlreadyTakenException;
 import dataaccess.exceptions.AuthTokenNotFoundException;
+import dataaccess.exceptions.GameNotFoundException;
 import dataaccess.exceptions.InvalidGameNameException;
 import model.GameData;
 
@@ -31,7 +33,7 @@ public class GameService {
             throw new AuthTokenNotFoundException("Auth token not found.");
         }
 
-        if (gameName.isEmpty()) {
+        if (gameName.isBlank()) {
             throw new InvalidGameNameException("Game name is invalid.");
         }
 
@@ -40,5 +42,34 @@ public class GameService {
         return gameDAO.createGame(gameName, game);
     }
 
-    public void joinGame(String authToken, int gameID, ChessGame.TeamColor teamColor) { }
+    public void joinGame(String authToken, int gameID, ChessGame.TeamColor teamColor)
+            throws AuthTokenNotFoundException,
+            GameNotFoundException,
+            AlreadyTakenException {
+
+        if (!userDAO.authExists(authToken)) {
+            throw new AuthTokenNotFoundException("Auth token not found.");
+        }
+
+        GameData game = gameDAO.getGame(gameID);
+
+        if (game == null) {
+            throw new GameNotFoundException("Game with provided gameID not found.");
+        } else if ((teamColor == ChessGame.TeamColor.WHITE && game.whiteUsername() != null)
+                || (teamColor == ChessGame.TeamColor.BLACK && game.blackUsername() != null)) {
+            throw new AlreadyTakenException("Someone is already playing for this team in the game.");
+        }
+
+        String username = userDAO.getUsernameByToken(authToken);
+
+        GameData updatedGame = new GameData(
+                game.gameID(),
+                teamColor == ChessGame.TeamColor.WHITE ? username : game.whiteUsername(),
+                teamColor == ChessGame.TeamColor.BLACK ? username : game.blackUsername(),
+                game.gameName(),
+                game.game()
+        );
+
+        gameDAO.updateGame(updatedGame);
+    }
 }

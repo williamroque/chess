@@ -18,6 +18,11 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
+    public String getUsernameByToken(String authToken) {
+        return auths.get(authToken) == null ? null : auths.get(authToken).username();
+    }
+
+    @Override
     public void createUser(UserData user) throws AlreadyTakenException {
         if (users.containsKey(user.username())) {
             throw new AlreadyTakenException("This username already exists!");
