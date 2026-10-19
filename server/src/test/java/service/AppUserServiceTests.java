@@ -45,21 +45,19 @@ public class AppUserServiceTests {
     }
 
     private void populateDummyUsers() {
-        HashMap<String, UserData> dummyUsers = new HashMap<>(Map.of(
-                "johnny", new UserData("johnny", "1234", "johnny@email.com"),
-                "megan", new UserData("megan", "4321", "megan@email.com"),
-                "charlie", new UserData("charlie", "4444", "charlie@email.com")
-        ));
-        userDAO._setUsers(dummyUsers);
+        try {
+            userDAO.createUser(new UserData("johnny", "1234", "johnny@email.com"));
+            userDAO.createUser(new UserData("megan", "4321", "megan@email.com"));
+            userDAO.createUser(new UserData("charlie", "4444", "charlie@email.com"));
+        } catch (Exception _) {
+
+        }
     }
 
     private void populateDummyAuths() {
-        HashMap<String, AuthData> dummyAuths = new HashMap<>(Map.of(
-                "1234-4312-1234-0175", new AuthData("1234-4312-1234-0175", "johnny"),
-                "0982-3917-5916-5629", new AuthData("0982-3917-5916-5629", "megan"),
-                "5017-0572-9572-4827", new AuthData("5017-0572-9572-4827", "charlie")
-        ));
-        userDAO._setAuths(dummyAuths);
+        userDAO.createAuth(new AuthData("1234-4312-1234-0175", "johnny"));
+        userDAO.createAuth(new AuthData("0982-3917-5916-5629", "megan"));
+        userDAO.createAuth(new AuthData("5017-0572-9572-4827", "charlie"));
     }
 
     /*
@@ -73,13 +71,13 @@ public class AppUserServiceTests {
         populateDummyUsers();
         populateDummyAuths();
 
-        Assertions.assertFalse(userDAO._getUsers().isEmpty());
-        Assertions.assertFalse(userDAO._getAuths().isEmpty());
+        Assertions.assertFalse(userDAO.getUsers().isEmpty());
+        Assertions.assertFalse(userDAO.getAuths().isEmpty());
 
         appService.clear();
 
-        Assertions.assertTrue(userDAO._getUsers().isEmpty());
-        Assertions.assertTrue(userDAO._getAuths().isEmpty());
+        Assertions.assertTrue(userDAO.getUsers().isEmpty());
+        Assertions.assertTrue(userDAO.getAuths().isEmpty());
     }
 
     /*
@@ -90,7 +88,7 @@ public class AppUserServiceTests {
     @Order(2)
     @DisplayName("Test registering new user to see if actually created")
     public void testRegisteringCreatesUsers() {
-        Assertions.assertTrue(userDAO._getUsers().isEmpty());
+        Assertions.assertTrue(userDAO.getUsers().isEmpty());
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
 
@@ -100,15 +98,15 @@ public class AppUserServiceTests {
 
         }
 
-        Assertions.assertEquals(1, userDAO._getUsers().size());
-        Assertions.assertEquals(dummyUser, userDAO._getUsers().values().toArray()[0]);
+        Assertions.assertEquals(1, userDAO.getUsers().size());
+        Assertions.assertEquals(dummyUser, userDAO.getUsers().toArray()[0]);
     }
 
     @Test
     @Order(3)
     @DisplayName("Test registering new user to see if auth created")
     public void testRegisteringCreatesAuth() {
-        Assertions.assertTrue(userDAO._getAuths().isEmpty());
+        Assertions.assertTrue(userDAO.getAuths().isEmpty());
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
 
@@ -118,14 +116,14 @@ public class AppUserServiceTests {
 
         }
 
-        Assertions.assertEquals(1, userDAO._getAuths().size());
+        Assertions.assertEquals(1, userDAO.getAuths().size());
     }
 
     @Test
     @Order(4)
     @DisplayName("Test user already exists exception during registration")
     public void testRegisteringThrowsAlreadyExists() {
-        Assertions.assertTrue(userDAO._getUsers().isEmpty());
+        Assertions.assertTrue(userDAO.getUsers().isEmpty());
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
 
@@ -144,7 +142,7 @@ public class AppUserServiceTests {
     @Order(5)
     @DisplayName("Test if registering return reasonable login results")
     public void testRegisteringReturnsReasonableResults() {
-        Assertions.assertTrue(userDAO._getUsers().isEmpty());
+        Assertions.assertTrue(userDAO.getUsers().isEmpty());
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
 
@@ -168,7 +166,7 @@ public class AppUserServiceTests {
     @Order(6)
     @DisplayName("Test if trying to log in with non-existent user throws exception")
     public void testLoginNonExistentUserThrowsException() {
-        Assertions.assertTrue(userDAO._getUsers().isEmpty());
+        Assertions.assertTrue(userDAO.getUsers().isEmpty());
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
 
@@ -181,8 +179,8 @@ public class AppUserServiceTests {
     @Order(7)
     @DisplayName("Test if credentials are invalid on login")
     public void testLoginInvalidCredentialsException() {
-        Assertions.assertTrue(userDAO._getAuths().isEmpty());
-        Assertions.assertTrue(userDAO._getUsers().isEmpty());
+        Assertions.assertTrue(userDAO.getAuths().isEmpty());
+        Assertions.assertTrue(userDAO.getUsers().isEmpty());
 
         populateDummyUsers();
         populateDummyAuths();
@@ -198,8 +196,8 @@ public class AppUserServiceTests {
     @Order(8)
     @DisplayName("Test if login creates auth")
     public void testLoginCreatesAuth() {
-        Assertions.assertTrue(userDAO._getAuths().isEmpty());
-        Assertions.assertTrue(userDAO._getUsers().isEmpty());
+        Assertions.assertTrue(userDAO.getAuths().isEmpty());
+        Assertions.assertTrue(userDAO.getUsers().isEmpty());
 
         populateDummyUsers();
 
@@ -211,15 +209,15 @@ public class AppUserServiceTests {
 
         }
 
-        Assertions.assertFalse(userDAO._getAuths().isEmpty());
+        Assertions.assertFalse(userDAO.getAuths().isEmpty());
     }
 
     @Test
     @Order(9)
     @DisplayName("Test if logging in returns reasonable results")
     public void testLoggingInReturnsReasonableResults() {
-        Assertions.assertTrue(userDAO._getUsers().isEmpty());
-        Assertions.assertTrue(userDAO._getAuths().isEmpty());
+        Assertions.assertTrue(userDAO.getUsers().isEmpty());
+        Assertions.assertTrue(userDAO.getAuths().isEmpty());
 
         populateDummyUsers();
 
@@ -245,8 +243,8 @@ public class AppUserServiceTests {
     @Order(10)
     @DisplayName("Test if missing auth token throws exception")
     public void testLogoutMissingAuthTokenException() {
-        Assertions.assertTrue(userDAO._getUsers().isEmpty());
-        Assertions.assertTrue(userDAO._getAuths().isEmpty());
+        Assertions.assertTrue(userDAO.getUsers().isEmpty());
+        Assertions.assertTrue(userDAO.getAuths().isEmpty());
 
         populateDummyUsers();
         populateDummyAuths();
@@ -262,13 +260,13 @@ public class AppUserServiceTests {
     @Order(10)
     @DisplayName("Test if logout deletes auth token")
     public void testLogoutDeletesAuthToken() {
-        Assertions.assertTrue(userDAO._getUsers().isEmpty());
-        Assertions.assertTrue(userDAO._getAuths().isEmpty());
+        Assertions.assertTrue(userDAO.getUsers().isEmpty());
+        Assertions.assertTrue(userDAO.getAuths().isEmpty());
 
         populateDummyUsers();
         populateDummyAuths();
 
-        Assertions.assertEquals(3, userDAO._getAuths().size());
+        Assertions.assertEquals(3, userDAO.getAuths().size());
 
         String dummyAuthToken = "1234-4312-1234-0175";
 
@@ -278,6 +276,6 @@ public class AppUserServiceTests {
 
         }
 
-        Assertions.assertEquals(2, userDAO._getAuths().size());
+        Assertions.assertEquals(2, userDAO.getAuths().size());
     }
 }

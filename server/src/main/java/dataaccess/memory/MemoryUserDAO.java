@@ -6,6 +6,7 @@ import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 public class MemoryUserDAO implements UserDAO {
@@ -56,19 +57,11 @@ public class MemoryUserDAO implements UserDAO {
         auths.clear();
     }
 
-    public HashMap<String, UserData> _getUsers() {
-        return users;
+    public Collection<UserData> getUsers() {
+        return users.values();
     }
 
-    public HashMap<String, AuthData> _getAuths() {
-        return auths;
-    }
-
-    public void _setUsers(HashMap<String, UserData> users) {
-        this.users = users;
-    }
-
-    public void _setAuths(HashMap<String, AuthData> auths) {
-        this.auths = auths;
+    public Collection<AuthData> getAuths() {
+        return auths.values();
     }
 }

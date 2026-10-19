@@ -1,9 +1,10 @@
-package server;
+package server.passoff;
 
 import chess.ChessGame;
 import org.junit.jupiter.api.*;
 import passoff.model.*;
 import passoff.server.TestServerFacade;
+import server.Server;
 
 import java.net.HttpURLConnection;
 import java.util.*;

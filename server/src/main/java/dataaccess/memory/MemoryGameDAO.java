@@ -52,11 +52,10 @@ public class MemoryGameDAO implements GameDAO {
         games.clear();
     }
 
-    public HashMap<Integer, GameData> _getGames() {
-        return games;
-    }
-
-    public void _setGames(HashMap<Integer, GameData> games) {
-        this.games = games;
+    public void setGames(Collection<GameData> gameList) {
+        for (GameData game : gameList) {
+            int gameID = games.size() + 1;
+            games.put(gameID, game);
+        }
     }
 }

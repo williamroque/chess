@@ -14,10 +14,7 @@ import service.GameService;
 import service.UserService;
 import service.results.LoginResult;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class GameServiceTests {
@@ -47,40 +44,38 @@ public class GameServiceTests {
     }
 
     private void populateDummyUsers() {
-        HashMap<String, UserData> dummyUsers = new HashMap<>(Map.of(
-                "johnny", new UserData("johnny", "1234", "johnny@email.com"),
-                "megan", new UserData("megan", "4321", "megan@email.com"),
-                "charlie", new UserData("charlie", "4444", "charlie@email.com")
-        ));
-        userDAO._setUsers(dummyUsers);
+        try {
+            userDAO.createUser(new UserData("johnny", "1234", "johnny@email.com"));
+            userDAO.createUser(new UserData("megan", "4321", "megan@email.com"));
+            userDAO.createUser(new UserData("charlie", "4444", "charlie@email.com"));
+        } catch (Exception _) {
+
+        }
     }
 
     private void populateDummyAuths() {
-        HashMap<String, AuthData> dummyAuths = new HashMap<>(Map.of(
-                "1234-4312-1234-0175", new AuthData("1234-4312-1234-0175", "johnny"),
-                "0982-3917-5916-5629", new AuthData("0982-3917-5916-5629", "megan"),
-                "5017-0572-9572-4827", new AuthData("5017-0572-9572-4827", "charlie")
-        ));
-        userDAO._setAuths(dummyAuths);
+        userDAO.createAuth(new AuthData("1234-4312-1234-0175", "johnny"));
+        userDAO.createAuth(new AuthData("0982-3917-5916-5629", "megan"));
+        userDAO.createAuth(new AuthData("5017-0572-9572-4827", "charlie"));
     }
 
-    private HashMap<Integer, GameData> populateDummyGames() {
-        HashMap<Integer, GameData> dummyGames = new HashMap<>(Map.of(
-                1, new GameData(
+    private Collection<GameData> populateDummyGames() {
+        ArrayList<GameData> dummyGames = new ArrayList<GameData>(List.of(
+                new GameData(
                         1,
                         "johnny",
                         "megan",
                         "johnny-vs-megan",
                         new ChessGame()
                 ),
-                2, new GameData(
+                new GameData(
                         2,
                         "charlie",
                         null,
                         "charlie-vs-null",
                         new ChessGame()
                 ),
-                3, new GameData(
+                new GameData(
                         3,
                         null,
                         null,
@@ -88,7 +83,7 @@ public class GameServiceTests {
                         new ChessGame()
                 )
         ));
-        gameDAO._setGames(dummyGames);
+        gameDAO.setGames(dummyGames);
 
         return dummyGames;
     }
@@ -118,7 +113,7 @@ public class GameServiceTests {
     public void testGameListReturnsCorrectly() {
         populateDummyUsers();
         populateDummyAuths();
-        HashMap<Integer, GameData> dummyGames = populateDummyGames();
+        Collection<GameData> dummyGames = populateDummyGames();
 
         String dummyAuthToken = "1234-4312-1234-0175";
 
@@ -130,7 +125,7 @@ public class GameServiceTests {
 
         }
 
-        Assertions.assertEquals(dummyGames.values(), gameList);
+        Assertions.assertArrayEquals(dummyGames.toArray(), gameList.toArray());
     }
 
     @Test
@@ -172,7 +167,7 @@ public class GameServiceTests {
 
         String dummyAuthToken = "1234-4312-1234-0175";
 
-        Assertions.assertEquals(0, gameDAO._getGames().size());
+        Assertions.assertEquals(0, gameDAO.getGameList().size());
 
         try {
             gameService.createGame(dummyAuthToken, "game123");
@@ -180,7 +175,7 @@ public class GameServiceTests {
 
         }
 
-        Assertions.assertEquals(1, gameDAO._getGames().size());
+        Assertions.assertEquals(1, gameDAO.getGameList().size());
     }
 
     @Test
@@ -192,7 +187,7 @@ public class GameServiceTests {
 
         String dummyAuthToken = "1234-4312-1234-0175";
 
-        Assertions.assertEquals(0, gameDAO._getGames().size());
+        Assertions.assertEquals(0, gameDAO.getGameList().size());
 
         GameData dummyData = new GameData(
                 1,
