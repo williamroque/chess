@@ -66,22 +66,22 @@ public class GameServiceTests {
 
     private HashMap<Integer, GameData> populateDummyGames() {
         HashMap<Integer, GameData> dummyGames = new HashMap<>(Map.of(
-                0, new GameData(
-                        0,
+                1, new GameData(
+                        1,
                         "johnny",
                         "megan",
                         "johnny-vs-megan",
                         new ChessGame()
                 ),
-                1, new GameData(
-                        1,
+                2, new GameData(
+                        2,
                         "charlie",
                         null,
                         "charlie-vs-null",
                         new ChessGame()
                 ),
-                2, new GameData(
-                        2,
+                3, new GameData(
+                        3,
                         null,
                         null,
                         "null-vs-null",
@@ -195,7 +195,7 @@ public class GameServiceTests {
         Assertions.assertEquals(0, gameDAO._getGames().size());
 
         GameData dummyData = new GameData(
-                0,
+                1,
                 null,
                 null,
                 "game123",
@@ -203,7 +203,7 @@ public class GameServiceTests {
         );
 
         GameData data = new GameData(
-                0,
+                1,
                 null,
                 null,
                 null,
@@ -228,7 +228,7 @@ public class GameServiceTests {
         populateDummyGames();
 
         String dummyAuthToken = "INVALID-TOKEN";
-        int dummyID = 0;
+        int dummyID = 1;
         ChessGame.TeamColor dummyTeam = ChessGame.TeamColor.WHITE;
 
         Assertions.assertThrows(AuthTokenNotFoundException.class, () -> {
@@ -262,7 +262,7 @@ public class GameServiceTests {
         populateDummyGames();
 
         String dummyAuthToken = "1234-4312-1234-0175";
-        int dummyID = 0;
+        int dummyID = 1;
         ChessGame.TeamColor dummyTeam = ChessGame.TeamColor.WHITE;
 
         try {
@@ -287,7 +287,7 @@ public class GameServiceTests {
         String dummyAuthToken = "1234-4312-1234-0175";
         String dummyUsername = "johnny";
 
-        int dummyID = 2;
+        int dummyID = 3;
         ChessGame.TeamColor dummyTeam = ChessGame.TeamColor.WHITE;
 
         Assertions.assertNull(gameDAO.getGame(dummyID).whiteUsername());
