@@ -1,5 +1,6 @@
 package server;
 
+import com.google.gson.Gson;
 import dataaccess.memory.MemoryAppDAO;
 import dataaccess.memory.MemoryGameDAO;
 import dataaccess.memory.MemoryUserDAO;
@@ -7,6 +8,7 @@ import handler.AppHandler;
 import handler.GameHandler;
 import handler.UserHandler;
 import io.javalin.*;
+import io.javalin.http.Context;
 import io.javalin.json.JavalinGson;
 import service.AppService;
 import service.GameService;
@@ -34,6 +36,7 @@ public class Server {
                     config.jsonMapper(new JavalinGson());
                 })
                 .delete("/db", appHandler::clear)
+                .post("/user", userHandler::register)
                 .start(8080);
     }
 
@@ -44,5 +47,15 @@ public class Server {
 
     public void stop() {
         javalin.stop();
+    }
+
+    public static <T> T getBodyObject(Context context, Class<T> clazz) {
+        var bodyObject = new Gson().fromJson(context.body(), clazz);
+
+        if (bodyObject == null) {
+            throw new InvalidRequestException("Missing required body.");
+        }
+
+        return bodyObject;
     }
 }
