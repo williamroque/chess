@@ -5,11 +5,17 @@ import dataaccess.GameDAO;
 import dataaccess.exceptions.GameNotFoundException;
 import model.GameData;
 
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashMap;
 
 public class SQLGameDAO implements GameDAO {
     HashMap<Integer, GameData> games = new HashMap<>();
+    Connection connection;
+
+    public SQLGameDAO(Connection connection) {
+        this.connection = connection;
+    }
 
     @Override
     public Collection<GameData> getGameList() {

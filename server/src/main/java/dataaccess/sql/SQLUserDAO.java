@@ -6,12 +6,19 @@ import dataaccess.exceptions.AuthTokenNotFoundException;
 import model.AuthData;
 import model.UserData;
 
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashMap;
 
 public class SQLUserDAO implements UserDAO {
     HashMap<String, UserData> users = new HashMap<>();
     HashMap<String, AuthData> auths = new HashMap<>();
+
+    Connection connection;
+
+    public SQLUserDAO(Connection connection) {
+        this.connection = connection;
+    }
 
     @Override
     public UserData getUser(String username) {

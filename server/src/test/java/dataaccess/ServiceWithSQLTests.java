@@ -23,13 +23,24 @@ public class ServiceWithSQLTests {
 
     @BeforeAll
     public static void init() {
-        userDAO = new SQLUserDAO();
-        gameDAO = new SQLGameDAO();
-        appDAO = new SQLAppDAO(userDAO, gameDAO);
+        try {
+            DatabaseManager.createDatabase();
+        } catch (Exception e) {
+            System.err.println(e);
+        }
 
-        userService = new UserService(userDAO);
-        gameService = new GameService(gameDAO, userDAO);
-        appService = new AppService(appDAO);
+        try (var connection = DatabaseManager.getConnection()) {
+            userDAO = new SQLUserDAO(connection);
+            gameDAO = new SQLGameDAO(connection);
+            appDAO = new SQLAppDAO(userDAO, gameDAO);
+
+            userService = new UserService(userDAO);
+            gameService = new GameService(gameDAO, userDAO);
+            appService = new AppService(appDAO);
+
+        } catch (Exception e) {
+            System.err.println(e);
+        }
     }
 
     @BeforeEach
