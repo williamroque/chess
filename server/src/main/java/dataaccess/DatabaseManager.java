@@ -104,6 +104,28 @@ public class DatabaseManager {
         }
     }
 
+    static void executeUpdate(Connection connection, String sql, Object... params) throws DataAccessException {
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            for (int i = 0; i < params.length; i++) {
+                statement.setObject(i + 1, params[i]);
+            }
+            statement.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("failed to get connection", ex);
+        }
+    }
+
+    static ResultSet executeQuery(Connection connection, String sql, Object... params) throws DataAccessException {
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            for (int i = 0; i < params.length; i++) {
+                statement.setObject(i + 1, params[i]);
+            }
+            return statement.executeQuery();
+        } catch (SQLException ex) {
+            throw new DataAccessException("failed to get connection", ex);
+        }
+    }
+
     private static void loadPropertiesFromResources() {
         try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
             if (propStream == null) {
