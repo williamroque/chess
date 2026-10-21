@@ -1,18 +1,19 @@
 package dataaccess;
 
 import chess.ChessGame;
+import dataaccess.exceptions.DataAccessException;
 import dataaccess.exceptions.GameNotFoundException;
 import model.GameData;
 
 import java.util.Collection;
 
 public interface GameDAO {
-    Collection<GameData> getGameList();
-    GameData getGame(int gameID);
+    Collection<GameData> getGameList() throws DataAccessException;
+    GameData getGame(int gameID) throws DataAccessException;
 
-    GameData createGame(String gameName, ChessGame game);
+    GameData createGame(String gameName, ChessGame game) throws DataAccessException;
 
-    void updateGame(GameData game) throws GameNotFoundException;
+    void updateGame(GameData game) throws DataAccessException;
 
-    void clear();
+    void clear() throws DataAccessException;
 }

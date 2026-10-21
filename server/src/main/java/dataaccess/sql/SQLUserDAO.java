@@ -1,74 +1,106 @@
 package dataaccess.sql;
 
+import dataaccess.DatabaseManager;
 import dataaccess.UserDAO;
 import dataaccess.exceptions.AlreadyTakenException;
 import dataaccess.exceptions.AuthTokenNotFoundException;
+import dataaccess.exceptions.DataAccessException;
 import model.AuthData;
 import model.UserData;
 
-import java.sql.Connection;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.List;
 
 public class SQLUserDAO implements UserDAO {
-    HashMap<String, UserData> users = new HashMap<>();
-    HashMap<String, AuthData> auths = new HashMap<>();
+    @Override
+    public UserData getUser(String username) throws DataAccessException {
+        String sql = "SELECT username, password, email FROM users WHERE username = ? LIMIT 1;";
 
-    Connection connection;
+        List<UserData> results = DatabaseManager.executeQuery(
+                sql,
+                rs -> new UserData(
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("email")
+                ),
+                username
+        );
 
-    public SQLUserDAO(Connection connection) {
-        this.connection = connection;
+        return results.isEmpty() ? null : results.getFirst();
     }
 
     @Override
-    public UserData getUser(String username) {
-        return users.get(username);
+    public String getUsernameByToken(String authToken) throws DataAccessException {
+        String sql = "SELECT username FROM auths WHERE authToken = ? LIMIT 1;";
+
+        List<String> results = DatabaseManager.executeQuery(
+                sql,
+                rs -> rs.getString("username"),
+                authToken
+        );
+
+        return results.isEmpty() ? null : results.getFirst();
     }
 
     @Override
-    public String getUsernameByToken(String authToken) {
-        return auths.get(authToken) == null ? null : auths.get(authToken).username();
-    }
-
-    @Override
-    public void createUser(UserData user) throws AlreadyTakenException {
-        if (users.containsKey(user.username())) {
+    public void createUser(UserData user) throws DataAccessException {
+        if (getUser(user.username()) != null) {
             throw new AlreadyTakenException("This username already exists!");
         }
 
-        users.put(user.username(), user);
+        String sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?);";
+
+        DatabaseManager.executeUpdate(sql, user.username(), user.password(), user.email());
     }
 
     @Override
     public void createAuth(AuthData auth) {
-        auths.put(auth.authToken(), auth);
+//        auths.put(auth.authToken(), auth);
     }
 
     @Override
     public boolean authExists(String authToken) {
-        return auths.containsKey(authToken);
+//        return auths.containsKey(authToken);
+        return false;
     }
 
     @Override
     public void deleteAuth(String authToken) throws AuthTokenNotFoundException {
-        if (!authExists(authToken)) {
-            throw new AuthTokenNotFoundException("The provided username-token pair does not exist.");
-        }
-
-        auths.remove(authToken);
+//        if (!authExists(authToken)) {
+//            throw new AuthTokenNotFoundException("The provided username-token pair does not exist.");
+//        }
+//
+//        auths.remove(authToken);
     }
 
     @Override
     public void clear() {
-        users.clear();
-        auths.clear();
+//        users.clear();
+//        auths.clear();
     }
 
-    public Collection<UserData> getUsers() {
-        return users.values();
+    public Collection<UserData> getUsers() throws DataAccessException {
+        String sql = "SELECT username, password, email FROM users;";
+
+        return DatabaseManager.executeQuery(
+                sql,
+                rs -> new UserData(
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("email")
+                )
+        );
     }
 
-    public Collection<AuthData> getAuths() {
-        return auths.values();
+    public Collection<AuthData> getAuths() throws DataAccessException {
+        String sql = "SELECT username, authToken FROM auths;";
+
+        return DatabaseManager.executeQuery(
+                sql,
+                rs -> new AuthData(
+                        rs.getString("username"),
+                        rs.getString("authToken")
+                )
+        );
     }
 }

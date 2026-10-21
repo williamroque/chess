@@ -3,6 +3,8 @@ package dataaccess;
 import dataaccess.exceptions.DataAccessException;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class DatabaseManager {
@@ -47,6 +49,11 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
+
+    @FunctionalInterface
+    public interface RowMapper<T> {
+        T map(ResultSet rs) throws SQLException;
+    }
 
     /*
      * Load the database information for the db.properties file.
@@ -104,23 +111,36 @@ public class DatabaseManager {
         }
     }
 
-    static void executeUpdate(Connection connection, String sql, Object... params) throws DataAccessException {
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            for (int i = 0; i < params.length; i++) {
-                statement.setObject(i + 1, params[i]);
+    public static void executeUpdate(String sql, Object... params) throws DataAccessException {
+        try (Connection connection = getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                for (int i = 0; i < params.length; i++) {
+                    statement.setObject(i + 1, params[i]);
+                }
+                statement.executeUpdate();
             }
-            statement.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("failed to get connection", ex);
         }
     }
 
-    static ResultSet executeQuery(Connection connection, String sql, Object... params) throws DataAccessException {
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            for (int i = 0; i < params.length; i++) {
-                statement.setObject(i + 1, params[i]);
+    public static <T> List<T> executeQuery(String sql, RowMapper<T> mapper, Object... params) throws DataAccessException {
+        try (Connection connection = getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                for (int i = 0; i < params.length; i++) {
+                    statement.setObject(i + 1, params[i]);
+                }
+
+                try (ResultSet rs = statement.executeQuery()) {
+                    List<T> results = new ArrayList<>();
+
+                    while (rs.next()) {
+                        results.add(mapper.map(rs));
+                    }
+
+                    return results;
+                }
             }
-            return statement.executeQuery();
         } catch (SQLException ex) {
             throw new DataAccessException("failed to get connection", ex);
         }

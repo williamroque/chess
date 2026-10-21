@@ -2,6 +2,7 @@ package dataaccess;
 
 import dataaccess.exceptions.AlreadyTakenException;
 import dataaccess.exceptions.AuthTokenNotFoundException;
+import dataaccess.exceptions.DataAccessException;
 import dataaccess.exceptions.InvalidCredentialsException;
 import model.UserData;
 import org.junit.jupiter.api.*;
@@ -16,7 +17,7 @@ public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(1)
     @DisplayName("Test clearing in app service with users.")
-    public void testAppClearsUsers() {
+    public void testAppClearsUsers() throws DataAccessException {
         populateDummyUsers();
         populateDummyAuths();
 
@@ -36,7 +37,7 @@ public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(2)
     @DisplayName("Test registering new user to see if actually created")
-    public void testRegisteringCreatesUsers() {
+    public void testRegisteringCreatesUsers() throws DataAccessException {
         Assertions.assertTrue(userDAO.getUsers().isEmpty());
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
@@ -54,7 +55,7 @@ public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(3)
     @DisplayName("Test registering new user to see if auth created")
-    public void testRegisteringCreatesAuth() {
+    public void testRegisteringCreatesAuth() throws DataAccessException {
         Assertions.assertTrue(userDAO.getAuths().isEmpty());
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
@@ -71,7 +72,7 @@ public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(4)
     @DisplayName("Test user already exists exception during registration")
-    public void testRegisteringThrowsAlreadyExists() {
+    public void testRegisteringThrowsAlreadyExists() throws DataAccessException {
         Assertions.assertTrue(userDAO.getUsers().isEmpty());
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
@@ -90,7 +91,7 @@ public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(5)
     @DisplayName("Test if registering return reasonable login results")
-    public void testRegisteringReturnsReasonableResults() {
+    public void testRegisteringReturnsReasonableResults() throws DataAccessException {
         Assertions.assertTrue(userDAO.getUsers().isEmpty());
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
@@ -114,7 +115,7 @@ public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(6)
     @DisplayName("Test if trying to log in with non-existent user throws exception")
-    public void testLoginNonExistentUserThrowsException() {
+    public void testLoginNonExistentUserThrowsException() throws DataAccessException {
         Assertions.assertTrue(userDAO.getUsers().isEmpty());
 
         UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
@@ -127,7 +128,7 @@ public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(7)
     @DisplayName("Test if credentials are invalid on login")
-    public void testLoginInvalidCredentialsException() {
+    public void testLoginInvalidCredentialsException() throws DataAccessException {
         Assertions.assertTrue(userDAO.getAuths().isEmpty());
         Assertions.assertTrue(userDAO.getUsers().isEmpty());
 
@@ -144,7 +145,7 @@ public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(8)
     @DisplayName("Test if login creates auth")
-    public void testLoginCreatesAuth() {
+    public void testLoginCreatesAuth() throws DataAccessException {
         Assertions.assertTrue(userDAO.getAuths().isEmpty());
         Assertions.assertTrue(userDAO.getUsers().isEmpty());
 
@@ -164,7 +165,7 @@ public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(9)
     @DisplayName("Test if logging in returns reasonable results")
-    public void testLoggingInReturnsReasonableResults() {
+    public void testLoggingInReturnsReasonableResults() throws DataAccessException {
         Assertions.assertTrue(userDAO.getUsers().isEmpty());
         Assertions.assertTrue(userDAO.getAuths().isEmpty());
 
@@ -191,7 +192,7 @@ public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(10)
     @DisplayName("Test if missing auth token throws exception")
-    public void testLogoutMissingAuthTokenException() {
+    public void testLogoutMissingAuthTokenException() throws DataAccessException {
         Assertions.assertTrue(userDAO.getUsers().isEmpty());
         Assertions.assertTrue(userDAO.getAuths().isEmpty());
 
@@ -208,7 +209,7 @@ public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(10)
     @DisplayName("Test if logout deletes auth token")
-    public void testLogoutDeletesAuthToken() {
+    public void testLogoutDeletesAuthToken() throws DataAccessException {
         Assertions.assertTrue(userDAO.getUsers().isEmpty());
         Assertions.assertTrue(userDAO.getAuths().isEmpty());
 

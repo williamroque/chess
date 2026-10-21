@@ -3,10 +3,7 @@ package service;
 import chess.ChessGame;
 import dataaccess.GameDAO;
 import dataaccess.UserDAO;
-import dataaccess.exceptions.AlreadyTakenException;
-import dataaccess.exceptions.AuthTokenNotFoundException;
-import dataaccess.exceptions.GameNotFoundException;
-import dataaccess.exceptions.InvalidGameNameException;
+import dataaccess.exceptions.*;
 import model.GameData;
 
 import java.util.*;
@@ -20,7 +17,7 @@ public class GameService {
         this.userDAO = userDAO;
     }
 
-    public Collection<GameData> listGames(String authToken) throws AuthTokenNotFoundException {
+    public Collection<GameData> listGames(String authToken) throws DataAccessException {
         if (!userDAO.authExists(authToken)) {
             throw new AuthTokenNotFoundException("Auth token not found.");
         }
@@ -28,7 +25,7 @@ public class GameService {
         return gameDAO.getGameList();
     }
 
-    public GameData createGame(String authToken, String gameName) throws AuthTokenNotFoundException, InvalidGameNameException {
+    public GameData createGame(String authToken, String gameName) throws DataAccessException, InvalidGameNameException {
         if (!userDAO.authExists(authToken)) {
             throw new AuthTokenNotFoundException("Auth token not found.");
         }
@@ -43,9 +40,7 @@ public class GameService {
     }
 
     public void joinGame(String authToken, int gameID, ChessGame.TeamColor teamColor)
-            throws AuthTokenNotFoundException,
-            GameNotFoundException,
-            AlreadyTakenException {
+            throws DataAccessException {
 
         if (!userDAO.authExists(authToken)) {
             throw new AuthTokenNotFoundException("Auth token not found.");

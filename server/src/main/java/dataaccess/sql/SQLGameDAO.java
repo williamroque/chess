@@ -11,11 +11,6 @@ import java.util.HashMap;
 
 public class SQLGameDAO implements GameDAO {
     HashMap<Integer, GameData> games = new HashMap<>();
-    Connection connection;
-
-    public SQLGameDAO(Connection connection) {
-        this.connection = connection;
-    }
 
     @Override
     public Collection<GameData> getGameList() {

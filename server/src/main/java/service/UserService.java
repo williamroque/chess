@@ -5,6 +5,7 @@ import java.util.UUID;
 import dataaccess.exceptions.AlreadyTakenException;
 import dataaccess.UserDAO;
 import dataaccess.exceptions.AuthTokenNotFoundException;
+import dataaccess.exceptions.DataAccessException;
 import dataaccess.exceptions.InvalidCredentialsException;
 import model.AuthData;
 import model.UserData;
@@ -21,7 +22,7 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-    public LoginResult register(UserData user) throws AlreadyTakenException, InvalidCredentialsException {
+    public LoginResult register(UserData user) throws DataAccessException {
         if (user.username() == null || user.username().isBlank()
                 || user.password() == null || user.password().isBlank()
                 || user.email() == null || user.email().isBlank()) {
@@ -41,7 +42,7 @@ public class UserService {
         return new LoginResult(user.username(), auth.authToken());
     }
 
-    public LoginResult login(UserData user) throws InvalidCredentialsException {
+    public LoginResult login(UserData user) throws DataAccessException {
         UserData dbUser = userDAO.getUser(user.username());
 
         if (dbUser == null || !dbUser.password().equals(user.password())) {
@@ -55,7 +56,7 @@ public class UserService {
         return new LoginResult(user.username(), auth.authToken());
     }
 
-    public void logout(String authToken) throws AuthTokenNotFoundException {
+    public void logout(String authToken) throws DataAccessException {
         if (!userDAO.authExists(authToken)) {
             throw new AuthTokenNotFoundException("Auth token not found or invalid.");
         }
