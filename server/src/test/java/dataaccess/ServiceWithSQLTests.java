@@ -24,7 +24,7 @@ public class ServiceWithSQLTests {
     @BeforeAll
     public static void init() {
         try {
-            DatabaseManager.createDatabase();
+            DatabaseManager.configureDatabase();
         } catch (Exception e) {
             System.err.println(e);
         }

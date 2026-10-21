@@ -11,6 +11,43 @@ public class DatabaseManager {
     private static String dbPassword;
     private static String connectionUrl;
 
+    private static final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS users (
+              `id` int NOT NULL AUTO_INCREMENT,
+              `username` varchar(255) NOT NULL,
+              `password` varchar(60) NOT NULL,
+              `email` varchar(255) NOT NULL,
+              PRIMARY KEY (`id`),
+              INDEX(username),
+              INDEX(email)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS auths (
+              `id` int NOT NULL AUTO_INCREMENT,
+              `username` varchar(255) NOT NULL,
+              `authToken` varchar(36) NOT NULL,
+              PRIMARY KEY (`id`),
+              INDEX(username),
+              INDEX(authToken)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS games (
+              `id` int NOT NULL AUTO_INCREMENT,
+              `whiteUsername` varchar(255) DEFAULT NULL,
+              `blackUsername` varchar(255) DEFAULT NULL,
+              `gameName` varchar(255) NOT NULL,
+              `gameJSON` text NOT NULL,
+              PRIMARY KEY (`id`),
+              INDEX(gameName),
+              INDEX(whiteUsername),
+              INDEX(blackUsername)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+    };
+
     /*
      * Load the database information for the db.properties file.
      */
@@ -21,13 +58,26 @@ public class DatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    static public void createDatabase() throws DataAccessException {
+    static private void createDatabase() throws DataAccessException {
         var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
         try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
              var preparedStatement = conn.prepareStatement(statement)) {
             preparedStatement.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("failed to create database", ex);
+        }
+    }
+
+    static public void configureDatabase() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            for (String statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
         }
     }
 
