@@ -9,6 +9,7 @@ import dataaccess.exceptions.DataAccessException;
 import dataaccess.exceptions.InvalidCredentialsException;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import service.results.LoginResult;
 
 public class UserService {
@@ -16,6 +17,14 @@ public class UserService {
 
     private static String generateToken() {
         return UUID.randomUUID().toString();
+    }
+
+    private String hashPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+
+    private boolean checkPassword(String password, String hash) {
+        return BCrypt.checkpw(password, hash);
     }
 
     public UserService(UserDAO userDAO) {
@@ -33,7 +42,11 @@ public class UserService {
             throw new AlreadyTakenException("This username already exists!");
         }
 
-        userDAO.createUser(user);
+        userDAO.createUser(new UserData(
+                user.username(),
+                hashPassword(user.password()),
+                user.email()
+        ));
 
         AuthData auth = new AuthData(generateToken(), user.username());
 
@@ -45,7 +58,7 @@ public class UserService {
     public LoginResult login(UserData user) throws DataAccessException {
         UserData dbUser = userDAO.getUser(user.username());
 
-        if (dbUser == null || !dbUser.password().equals(user.password())) {
+        if (dbUser == null || !checkPassword(user.password(), dbUser.password())) {
             throw new InvalidCredentialsException("Invalid login credentials.");
         }
 
