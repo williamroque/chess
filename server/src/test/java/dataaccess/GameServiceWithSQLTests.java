@@ -11,7 +11,7 @@ import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class GameServiceWithSQLTests extends ServiceWithSQLTests {
-    private Collection<GameData> populateDummyGames() {
+    private Collection<GameData> populateDummyGames() throws DataAccessException {
         ArrayList<GameData> dummyGames = new ArrayList<GameData>(List.of(
                 new GameData(
                         1,

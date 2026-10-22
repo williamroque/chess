@@ -9,6 +9,7 @@ import dataaccess.exceptions.GameNotFoundException;
 import model.GameData;
 
 import java.util.Collection;
+import java.util.List;
 
 public class SQLGameDAO implements GameDAO {
     @Override
@@ -31,49 +32,74 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData getGame(int gameID) {
-//        return games.get(gameID);
+    public GameData getGame(int gameID) throws DataAccessException {
+        String sql = "SELECT * FROM games WHERE id = ? LIMIT 1";
 
-        return new GameData(0, null, null, null, null);
+        List<GameData> results = DatabaseManager.executeQuery(sql, rs -> {
+            String gameJSON = rs.getString("gameJSON");
+
+            ChessGame game = new Gson().fromJson(gameJSON, ChessGame.class);
+
+            return new GameData(
+                    rs.getInt("id"),
+                    rs.getString("whiteUsername"),
+                    rs.getString("blackUsername"),
+                    rs.getString("gameName"),
+                    game
+            );
+        }, gameID);
+
+        return results.size() == 1 ? results.getFirst() : null;
     }
 
     @Override
-    public GameData createGame(String gameName, ChessGame game) {
-//        int gameID = games.size() + 1;
-//
-//        GameData data = new GameData(
-//                gameID,
-//                null,
-//                null,
-//                gameName,
-//                game
-//        );
-//
-//        games.put(gameID, data);
-//
-//        return data;
+    public GameData createGame(String gameName, ChessGame game) throws DataAccessException {
+        String sql = "INSERT INTO games (gameName, gameJSON) VALUES (?, ?)";
 
-        return new GameData(0, null, null, null, null);
+        String gameJSON = new Gson().toJson(game);
+
+        List<Integer> returnedIDs = DatabaseManager.executeUpdate(sql, gameName, gameJSON);
+
+        if (returnedIDs.isEmpty()) {
+            return null;
+        }
+
+        return new GameData(
+                returnedIDs.getFirst(),
+                null,
+                null,
+                gameName,
+                game
+        );
     }
 
     @Override
-    public void updateGame(GameData game) throws GameNotFoundException {
-//        if (getGame(game.gameID()) == null) {
-//            throw new GameNotFoundException("Game with the specified ID does not exist.");
-//        }
-//
-//        games.put(game.gameID(), game);
+    public void updateGame(GameData game) throws DataAccessException {
+        if (getGame(game.gameID()) == null) {
+            throw new GameNotFoundException("Game with the specified ID does not exist.");
+        }
+
+        String sql = "UPDATE games SET whiteUsername = ?, blackUsername = ?, gameName = ?, gameJSON = ? WHERE id = ?";
+
+        DatabaseManager.executeUpdate(
+                sql,
+                game.whiteUsername(),
+                game.blackUsername(),
+                game.gameName(),
+                new Gson().toJson(game.game()),
+                game.gameID()
+        );
     }
 
     @Override
-    public void clear() {
-//        games.clear();
+    public void clear() throws DataAccessException {
+        DatabaseManager.executeUpdate("TRUNCATE TABLE games");
     }
 
-    public void setGames(Collection<GameData> gameList) {
-//        for (GameData game : gameList) {
-//            int gameID = games.size() + 1;
-//            games.put(gameID, game);
-//        }
+    public void setGames(Collection<GameData> gameList) throws DataAccessException {
+        for (GameData game : gameList) {
+            createGame(game.gameName(), game.game());
+            updateGame(game);
+        }
     }
 }
