@@ -1,9 +1,14 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DatabaseManager;
+import dataaccess.exceptions.DataAccessException;
 import dataaccess.memory.MemoryAppDAO;
 import dataaccess.memory.MemoryGameDAO;
 import dataaccess.memory.MemoryUserDAO;
+import dataaccess.sql.SQLAppDAO;
+import dataaccess.sql.SQLGameDAO;
+import dataaccess.sql.SQLUserDAO;
 import handler.AppHandler;
 import handler.GameHandler;
 import handler.UserHandler;
@@ -19,9 +24,15 @@ public class Server {
     private final Javalin javalin;
 
     public Server() {
-        MemoryUserDAO userDAO = new MemoryUserDAO();
-        MemoryGameDAO gameDAO = new MemoryGameDAO();
-        MemoryAppDAO appDAO = new MemoryAppDAO(userDAO, gameDAO);
+        try {
+            DatabaseManager.configureDatabase();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        SQLUserDAO userDAO = new SQLUserDAO();
+        SQLGameDAO gameDAO = new SQLGameDAO();
+        SQLAppDAO appDAO = new SQLAppDAO(userDAO, gameDAO);
 
         UserService userService = new UserService(userDAO);
         GameService gameService = new GameService(gameDAO, userDAO);
