@@ -1,6 +1,7 @@
 package dataaccess.sql;
 
 import dataaccess.AppDAO;
+import dataaccess.exceptions.DataAccessException;
 
 public class SQLAppDAO implements AppDAO {
     final SQLUserDAO userDAO;
@@ -12,7 +13,7 @@ public class SQLAppDAO implements AppDAO {
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataAccessException {
         this.gameDAO.clear();
         this.userDAO.clear();
     }

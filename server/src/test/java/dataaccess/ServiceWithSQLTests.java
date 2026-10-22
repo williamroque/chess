@@ -1,5 +1,6 @@
 package dataaccess;
 
+import dataaccess.exceptions.DataAccessException;
 import dataaccess.sql.SQLAppDAO;
 import dataaccess.sql.SQLGameDAO;
 import dataaccess.sql.SQLUserDAO;
@@ -39,7 +40,7 @@ public class ServiceWithSQLTests {
     }
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws DataAccessException {
         appService.clear();
     }
 
@@ -53,7 +54,7 @@ public class ServiceWithSQLTests {
         }
     }
 
-    protected void populateDummyAuths() {
+    protected void populateDummyAuths() throws DataAccessException {
         userDAO.createAuth(new AuthData("1234-4312-1234-0175", "johnny"));
         userDAO.createAuth(new AuthData("0982-3917-5916-5629", "megan"));
         userDAO.createAuth(new AuthData("5017-0572-9572-4827", "charlie"));

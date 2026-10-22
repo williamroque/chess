@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.AppDAO;
+import dataaccess.exceptions.DataAccessException;
 
 public class AppService {
     final AppDAO appDAO;
@@ -9,7 +10,7 @@ public class AppService {
         this.appDAO = appDAO;
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         this.appDAO.clear();
     }
 }

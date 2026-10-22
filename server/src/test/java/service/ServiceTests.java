@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.exceptions.DataAccessException;
 import dataaccess.memory.MemoryAppDAO;
 import dataaccess.memory.MemoryGameDAO;
 import dataaccess.memory.MemoryUserDAO;
@@ -30,7 +31,7 @@ public class ServiceTests {
     }
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws DataAccessException {
         appService.clear();
     }
 

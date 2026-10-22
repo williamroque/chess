@@ -23,7 +23,11 @@ public class AppUserServiceTests extends ServiceTests {
         Assertions.assertFalse(userDAO.getUsers().isEmpty());
         Assertions.assertFalse(userDAO.getAuths().isEmpty());
 
-        appService.clear();
+        try {
+            appService.clear();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
 
         Assertions.assertTrue(userDAO.getUsers().isEmpty());
         Assertions.assertTrue(userDAO.getAuths().isEmpty());

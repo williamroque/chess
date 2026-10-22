@@ -1,10 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
-import dataaccess.exceptions.AlreadyTakenException;
-import dataaccess.exceptions.AuthTokenNotFoundException;
-import dataaccess.exceptions.GameNotFoundException;
-import dataaccess.exceptions.InvalidGameNameException;
+import dataaccess.exceptions.*;
 import model.GameData;
 import org.junit.jupiter.api.*;
 
@@ -50,7 +47,7 @@ public class GameServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(1)
     @DisplayName("Test auth token not found on game list")
-    public void testGameListAuthNotFound() {
+    public void testGameListAuthNotFound() throws DataAccessException {
         populateDummyUsers();
         populateDummyAuths();
         populateDummyGames();
@@ -65,7 +62,7 @@ public class GameServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(2)
     @DisplayName("Test game list returns correctly")
-    public void testGameListReturnsCorrectly() {
+    public void testGameListReturnsCorrectly() throws DataAccessException {
         populateDummyUsers();
         populateDummyAuths();
         Collection<GameData> dummyGames = populateDummyGames();
@@ -86,7 +83,7 @@ public class GameServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(3)
     @DisplayName("Test create game throws on invalid token")
-    public void testCreateGameAuthTokenNotFound() {
+    public void testCreateGameAuthTokenNotFound() throws DataAccessException {
         populateDummyUsers();
         populateDummyAuths();
         populateDummyGames();
@@ -101,7 +98,7 @@ public class GameServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(4)
     @DisplayName("Test create game throws on invalid game name")
-    public void testCreateGameInvalidGameName() {
+    public void testCreateGameInvalidGameName() throws DataAccessException {
         populateDummyUsers();
         populateDummyAuths();
         populateDummyGames();
@@ -116,7 +113,7 @@ public class GameServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(5)
     @DisplayName("Test create game saves to DAO")
-    public void testCreateGameSavesToDAO() {
+    public void testCreateGameSavesToDAO() throws DataAccessException {
         populateDummyUsers();
         populateDummyAuths();
 
@@ -136,7 +133,7 @@ public class GameServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(6)
     @DisplayName("Test create game returns valid game")
-    public void testCreateGameReturnsValidGame() {
+    public void testCreateGameReturnsValidGame() throws DataAccessException {
         populateDummyUsers();
         populateDummyAuths();
 
@@ -172,7 +169,7 @@ public class GameServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(7)
     @DisplayName("Test join game auth token not found")
-    public void testJoinGameAuthNotFound() {
+    public void testJoinGameAuthNotFound() throws DataAccessException {
         populateDummyUsers();
         populateDummyAuths();
         populateDummyGames();
@@ -189,7 +186,7 @@ public class GameServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(7)
     @DisplayName("Test join game game ID not found")
-    public void testJoinGameIDNotFound() {
+    public void testJoinGameIDNotFound() throws DataAccessException {
         populateDummyUsers();
         populateDummyAuths();
         populateDummyGames();
@@ -206,7 +203,7 @@ public class GameServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(8)
     @DisplayName("Test join game with already taken team color")
-    public void testJoinGameAlreadyTakenTeam() {
+    public void testJoinGameAlreadyTakenTeam() throws DataAccessException {
         populateDummyUsers();
         populateDummyAuths();
         populateDummyGames();
@@ -229,7 +226,7 @@ public class GameServiceWithSQLTests extends ServiceWithSQLTests {
     @Test
     @Order(9)
     @DisplayName("Test join game updates game")
-    public void testJoinGameUpdatesGame() {
+    public void testJoinGameUpdatesGame() throws DataAccessException {
         populateDummyUsers();
         populateDummyAuths();
         populateDummyGames();

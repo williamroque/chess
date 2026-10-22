@@ -8,6 +8,7 @@ import dataaccess.exceptions.DataAccessException;
 import model.AuthData;
 import model.UserData;
 
+import java.sql.ResultSet;
 import java.util.Collection;
 import java.util.List;
 
@@ -54,29 +55,36 @@ public class SQLUserDAO implements UserDAO {
     }
 
     @Override
-    public void createAuth(AuthData auth) {
-//        auths.put(auth.authToken(), auth);
+    public void createAuth(AuthData auth) throws DataAccessException {
+        String sql = "INSERT INTO auths (authToken, username) VALUE (?, ?)";
+
+        DatabaseManager.executeUpdate(sql, auth.authToken(), auth.username());
     }
 
     @Override
-    public boolean authExists(String authToken) {
-//        return auths.containsKey(authToken);
-        return false;
+    public boolean authExists(String authToken) throws DataAccessException {
+        String sql = "SELECT * FROM auths WHERE authToken = ? LIMIT 1";
+
+        Collection<ResultSet> results = DatabaseManager.executeQuery(sql, rc -> rc, authToken);
+
+        return results.size() == 1;
     }
 
     @Override
-    public void deleteAuth(String authToken) throws AuthTokenNotFoundException {
-//        if (!authExists(authToken)) {
-//            throw new AuthTokenNotFoundException("The provided username-token pair does not exist.");
-//        }
-//
-//        auths.remove(authToken);
+    public void deleteAuth(String authToken) throws DataAccessException {
+        if (!authExists(authToken)) {
+            throw new AuthTokenNotFoundException("The provided username-token pair does not exist.");
+        }
+
+        String sql = "DELETE FROM auths WHERE authToken = ? LIMIT 1";
+
+        DatabaseManager.executeUpdate(sql, authToken);
     }
 
     @Override
-    public void clear() {
-//        users.clear();
-//        auths.clear();
+    public void clear() throws DataAccessException {
+        DatabaseManager.executeUpdate("TRUNCATE TABLE users");
+        DatabaseManager.executeUpdate("TRUNCATE TABLE auths");
     }
 
     public Collection<UserData> getUsers() throws DataAccessException {
