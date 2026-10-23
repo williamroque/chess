@@ -13,10 +13,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class SQLGameDAO implements GameDAO {
-    @Override
-    public Collection<GameData> getGameList() throws DataAccessException {
-        String sql = "SELECT * FROM games";
-
+    private Collection<GameData> executeReturnGames(String sql, Object... params) throws DataAccessException {
         return DatabaseManager.executeQuery(sql, rs -> {
             String gameJSON = rs.getString("gameJSON");
 
@@ -29,26 +26,18 @@ public class SQLGameDAO implements GameDAO {
                     rs.getString("gameName"),
                     game
             );
-        });
+        }, params);
+    }
+
+    @Override
+    public Collection<GameData> getGameList() throws DataAccessException {
+        return executeReturnGames("SELECT * FROM games");
     }
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         String sql = "SELECT * FROM games WHERE id = ? LIMIT 1";
-
-        List<GameData> results = DatabaseManager.executeQuery(sql, rs -> {
-            String gameJSON = rs.getString("gameJSON");
-
-            ChessGame game = new Gson().fromJson(gameJSON, ChessGame.class);
-
-            return new GameData(
-                    rs.getInt("id"),
-                    rs.getString("whiteUsername"),
-                    rs.getString("blackUsername"),
-                    rs.getString("gameName"),
-                    game
-            );
-        }, gameID);
+        List<GameData> results = executeReturnGames(sql, gameID).stream().toList();
 
         return results.size() == 1 ? results.getFirst() : null;
     }

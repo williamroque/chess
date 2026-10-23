@@ -10,6 +10,7 @@ import java.util.Collection;
 
 public interface GameDAO {
     Collection<GameData> getGameList() throws DataAccessException;
+
     GameData getGame(int gameID) throws DataAccessException;
 
     GameData createGame(String gameName, ChessGame game) throws DataAccessException;
