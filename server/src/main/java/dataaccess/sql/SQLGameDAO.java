@@ -8,6 +8,7 @@ import dataaccess.exceptions.DataAccessException;
 import dataaccess.exceptions.GameNotFoundException;
 import model.GameData;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -96,7 +97,7 @@ public class SQLGameDAO implements GameDAO {
         DatabaseManager.executeUpdate("TRUNCATE TABLE games");
     }
 
-    public void setGames(Collection<GameData> gameList) throws DataAccessException {
+    public void setGames(ArrayList<GameData> gameList) throws DataAccessException {
         for (GameData game : gameList) {
             createGame(game.gameName(), game.game());
             updateGame(game);

@@ -6,6 +6,8 @@ import dataaccess.exceptions.DataAccessException;
 import model.AuthData;
 import model.UserData;
 
+import java.util.Collection;
+
 public interface UserDAO {
     UserData getUser(String username) throws DataAccessException;
     String getUsernameByToken(String username) throws DataAccessException;
@@ -16,4 +18,8 @@ public interface UserDAO {
     void deleteAuth(String authToken) throws DataAccessException;
 
     void clear() throws DataAccessException;
+
+    Collection<UserData> getUsers() throws DataAccessException;
+
+    Collection<AuthData> getAuths() throws DataAccessException;
 }

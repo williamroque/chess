@@ -1,35 +1,28 @@
-package service;
+package shared;
 
+import dataaccess.AppDAO;
+import dataaccess.GameDAO;
+import dataaccess.UserDAO;
 import dataaccess.exceptions.DataAccessException;
-import dataaccess.memory.MemoryAppDAO;
-import dataaccess.memory.MemoryGameDAO;
-import dataaccess.memory.MemoryUserDAO;
+import dataaccess.sql.SQLAppDAO;
+import dataaccess.sql.SQLGameDAO;
+import dataaccess.sql.SQLUserDAO;
 import model.AuthData;
 import model.UserData;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.mindrot.jbcrypt.BCrypt;
+import service.AppService;
+import service.GameService;
+import service.UserService;
 
-public class ServiceTests {
-    protected static MemoryUserDAO userDAO;
-    protected static MemoryGameDAO gameDAO;
-    protected static MemoryAppDAO appDAO;
+abstract public class ServiceTests {
+    protected static UserDAO userDAO;
+    protected static GameDAO gameDAO;
+    protected static AppDAO appDAO;
 
     protected static UserService userService;
     protected static GameService gameService;
     protected static AppService appService;
-
-
-    @BeforeAll
-    public static void init() {
-        userDAO = new MemoryUserDAO();
-        gameDAO = new MemoryGameDAO();
-        appDAO = new MemoryAppDAO(userDAO, gameDAO);
-
-        userService = new UserService(userDAO);
-        gameService = new GameService(gameDAO, userDAO);
-        appService = new AppService(appDAO);
-    }
 
     @BeforeEach
     public void setup() throws DataAccessException {
@@ -46,7 +39,7 @@ public class ServiceTests {
         }
     }
 
-    protected void populateDummyAuths() {
+    protected void populateDummyAuths() throws DataAccessException {
         userDAO.createAuth(new AuthData("1234-4312-1234-0175", "johnny"));
         userDAO.createAuth(new AuthData("0982-3917-5916-5629", "megan"));
         userDAO.createAuth(new AuthData("5017-0572-9572-4827", "charlie"));

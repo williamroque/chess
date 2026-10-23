@@ -1,230 +1,32 @@
 package dataaccess;
 
-import dataaccess.exceptions.AlreadyTakenException;
-import dataaccess.exceptions.AuthTokenNotFoundException;
-import dataaccess.exceptions.DataAccessException;
-import dataaccess.exceptions.InvalidCredentialsException;
-import model.UserData;
-import org.junit.jupiter.api.*;
-import service.results.LoginResult;
+import dataaccess.sql.SQLAppDAO;
+import dataaccess.sql.SQLGameDAO;
+import dataaccess.sql.SQLUserDAO;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.TestMethodOrder;
+import service.AppService;
+import service.GameService;
+import service.UserService;
+import shared.AppUserServiceTests;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
-    /*
-    * ==== Foundational Clear Test ====
-    * */
-
-    @Test
-    @Order(1)
-    @DisplayName("Test clearing in app service with users.")
-    public void testAppClearsUsers() throws DataAccessException {
-        populateDummyUsers();
-        populateDummyAuths();
-
-        Assertions.assertFalse(userDAO.getUsers().isEmpty());
-        Assertions.assertFalse(userDAO.getAuths().isEmpty());
-
-        appService.clear();
-
-        Assertions.assertTrue(userDAO.getUsers().isEmpty());
-        Assertions.assertTrue(userDAO.getAuths().isEmpty());
-    }
-
-    /*
-     * ==== User Registration Tests ====
-     * */
-
-    @Test
-    @Order(2)
-    @DisplayName("Test registering new user to see if actually created")
-    public void testRegisteringCreatesUsers() throws DataAccessException {
-        Assertions.assertTrue(userDAO.getUsers().isEmpty());
-
-        UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
-
+public class AppUserServiceWithSQLTests extends AppUserServiceTests {
+    @BeforeAll
+    public static void init() {
         try {
-            userService.register(dummyUser);
-        } catch (Exception _) {
-
+            DatabaseManager.configureDatabase();
+        } catch (Exception e) {
+            System.err.println(e);
         }
 
-        Assertions.assertEquals(1, userDAO.getUsers().size());
-    }
+        userDAO = new SQLUserDAO();
+        gameDAO = new SQLGameDAO();
+        appDAO = new SQLAppDAO((SQLUserDAO) userDAO, (SQLGameDAO) gameDAO);
 
-    @Test
-    @Order(3)
-    @DisplayName("Test registering new user to see if auth created")
-    public void testRegisteringCreatesAuth() throws DataAccessException {
-        Assertions.assertTrue(userDAO.getAuths().isEmpty());
-
-        UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
-
-        try {
-            userService.register(dummyUser);
-        } catch (Exception _) {
-
-        }
-
-        Assertions.assertEquals(1, userDAO.getAuths().size());
-    }
-
-    @Test
-    @Order(4)
-    @DisplayName("Test user already exists exception during registration")
-    public void testRegisteringThrowsAlreadyExists() throws DataAccessException {
-        Assertions.assertTrue(userDAO.getUsers().isEmpty());
-
-        UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
-
-        try {
-            userService.register(dummyUser);
-        } catch (Exception _) {
-
-        }
-
-        Assertions.assertThrows(AlreadyTakenException.class, () -> {
-            userService.register(dummyUser);
-        });
-    }
-
-    @Test
-    @Order(5)
-    @DisplayName("Test if registering return reasonable login results")
-    public void testRegisteringReturnsReasonableResults() throws DataAccessException {
-        Assertions.assertTrue(userDAO.getUsers().isEmpty());
-
-        UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
-
-        LoginResult result = new LoginResult(null, null);
-
-        try {
-            result = userService.register(dummyUser);
-        } catch (Exception _) {
-
-        }
-
-        Assertions.assertEquals(dummyUser.username(), result.username());
-        Assertions.assertFalse(result.authToken().isBlank());
-    }
-
-    /*
-     * ==== User Login Tests ====
-     * */
-
-    @Test
-    @Order(6)
-    @DisplayName("Test if trying to log in with non-existent user throws exception")
-    public void testLoginNonExistentUserThrowsException() throws DataAccessException {
-        Assertions.assertTrue(userDAO.getUsers().isEmpty());
-
-        UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
-
-        Assertions.assertThrows(InvalidCredentialsException.class, () -> {
-            userService.login(dummyUser);
-        });
-    }
-
-    @Test
-    @Order(7)
-    @DisplayName("Test if credentials are invalid on login")
-    public void testLoginInvalidCredentialsException() throws DataAccessException {
-        Assertions.assertTrue(userDAO.getAuths().isEmpty());
-        Assertions.assertTrue(userDAO.getUsers().isEmpty());
-
-        populateDummyUsers();
-        populateDummyAuths();
-
-        UserData dummyUser = new UserData("johnny", "WRONG-PASSWORD", "johnny@email.com");
-
-        Assertions.assertThrows(InvalidCredentialsException.class, () -> {
-            userService.login(dummyUser);
-        });
-    }
-
-    @Test
-    @Order(8)
-    @DisplayName("Test if login creates auth")
-    public void testLoginCreatesAuth() throws DataAccessException {
-        Assertions.assertTrue(userDAO.getAuths().isEmpty());
-        Assertions.assertTrue(userDAO.getUsers().isEmpty());
-
-        populateDummyUsers();
-
-        UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
-
-        try {
-            userService.login(dummyUser);
-        } catch (Exception _) {
-
-        }
-
-        Assertions.assertFalse(userDAO.getAuths().isEmpty());
-    }
-
-    @Test
-    @Order(9)
-    @DisplayName("Test if logging in returns reasonable results")
-    public void testLoggingInReturnsReasonableResults() throws DataAccessException {
-        Assertions.assertTrue(userDAO.getUsers().isEmpty());
-        Assertions.assertTrue(userDAO.getAuths().isEmpty());
-
-        populateDummyUsers();
-
-        UserData dummyUser = new UserData("johnny", "1234", "johnny@email.com");
-
-        LoginResult result = new LoginResult(null, null);
-
-        try {
-            result = userService.login(dummyUser);
-        } catch (Exception _) {
-
-        }
-
-        Assertions.assertEquals(dummyUser.username(), result.username());
-        Assertions.assertFalse(result.authToken().isBlank());
-    }
-
-    /*
-     * ==== User Logout Tests ====
-     * */
-
-    @Test
-    @Order(10)
-    @DisplayName("Test if missing auth token throws exception")
-    public void testLogoutMissingAuthTokenException() throws DataAccessException {
-        Assertions.assertTrue(userDAO.getUsers().isEmpty());
-        Assertions.assertTrue(userDAO.getAuths().isEmpty());
-
-        populateDummyUsers();
-        populateDummyAuths();
-
-        String dummyAuthToken = "INVALID-TOKEN";
-
-        Assertions.assertThrows(AuthTokenNotFoundException.class, () -> {
-            userService.logout(dummyAuthToken);
-        });
-    }
-
-    @Test
-    @Order(10)
-    @DisplayName("Test if logout deletes auth token")
-    public void testLogoutDeletesAuthToken() throws DataAccessException {
-        Assertions.assertTrue(userDAO.getUsers().isEmpty());
-        Assertions.assertTrue(userDAO.getAuths().isEmpty());
-
-        populateDummyUsers();
-        populateDummyAuths();
-
-        Assertions.assertEquals(3, userDAO.getAuths().size());
-
-        String dummyAuthToken = "1234-4312-1234-0175";
-
-        try {
-            userService.logout(dummyAuthToken);
-        } catch (Exception _) {
-
-        }
-
-        Assertions.assertEquals(2, userDAO.getAuths().size());
+        userService = new UserService(userDAO);
+        gameService = new GameService(gameDAO, userDAO);
+        appService = new AppService(appDAO);
     }
 }

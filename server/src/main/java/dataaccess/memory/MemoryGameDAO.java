@@ -5,6 +5,7 @@ import dataaccess.GameDAO;
 import dataaccess.exceptions.GameNotFoundException;
 import model.GameData;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -52,7 +53,7 @@ public class MemoryGameDAO implements GameDAO {
         games.clear();
     }
 
-    public void setGames(Collection<GameData> gameList) {
+    public void setGames(ArrayList<GameData> gameList) {
         for (GameData game : gameList) {
             int gameID = games.size() + 1;
             games.put(gameID, game);
