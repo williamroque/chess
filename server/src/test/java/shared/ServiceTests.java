@@ -1,12 +1,10 @@
 package shared;
 
 import dataaccess.AppDAO;
+import dataaccess.DatabaseManager;
 import dataaccess.GameDAO;
 import dataaccess.UserDAO;
 import dataaccess.exceptions.DataAccessException;
-import dataaccess.sql.SQLAppDAO;
-import dataaccess.sql.SQLGameDAO;
-import dataaccess.sql.SQLUserDAO;
 import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +12,8 @@ import org.mindrot.jbcrypt.BCrypt;
 import service.AppService;
 import service.GameService;
 import service.UserService;
+
+import java.lang.reflect.InvocationTargetException;
 
 abstract public class ServiceTests {
     protected static UserDAO userDAO;
@@ -23,6 +23,29 @@ abstract public class ServiceTests {
     protected static UserService userService;
     protected static GameService gameService;
     protected static AppService appService;
+
+    public static void initializeWith(
+            Class<? extends UserDAO> userDAOClass,
+            Class<? extends GameDAO> gameDAOClass,
+            Class<? extends AppDAO> appDAOClass
+            ) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        try {
+            DatabaseManager.configureDatabase();
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+
+        userDAO = userDAOClass.getDeclaredConstructor().newInstance();
+        gameDAO = gameDAOClass.getDeclaredConstructor().newInstance();
+        appDAO = appDAOClass.getDeclaredConstructor(
+                userDAOClass,
+                gameDAOClass
+        ).newInstance(userDAO, gameDAO);
+
+        userService = new UserService(userDAO);
+        gameService = new GameService(gameDAO, userDAO);
+        appService = new AppService(appDAO);
+    }
 
     @BeforeEach
     public void setup() throws DataAccessException {

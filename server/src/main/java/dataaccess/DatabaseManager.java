@@ -118,25 +118,21 @@ public class DatabaseManager {
                     statement.setObject(i + 1, params[i]);
                 }
 
-                int affectedRows = statement.executeUpdate();
+                statement.executeUpdate();
 
-                if (affectedRows > 0) {
-                    try (ResultSet rs = statement.getGeneratedKeys()) {
-                        List<Integer> ids = new ArrayList<>();
+                try (ResultSet rs = statement.getGeneratedKeys()) {
+                    List<Integer> ids = new ArrayList<>();
 
-                        while (rs.next()) {
-                            ids.add(rs.getInt(1));
-                        }
-
-                        return ids;
+                    while (rs.next()) {
+                        ids.add(rs.getInt(1));
                     }
+
+                    return ids;
                 }
             }
         } catch (SQLException ex) {
             throw new DataAccessException("failed to get connection", ex);
         }
-
-        return List.of();
     }
 
     public static <T> List<T> executeQuery(String sql, RowMapper<T> mapper, Object... params) throws DataAccessException {
