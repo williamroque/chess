@@ -49,7 +49,6 @@ public class AppUserServiceWithSQLTests extends ServiceWithSQLTests {
         }
 
         Assertions.assertEquals(1, userDAO.getUsers().size());
-        Assertions.assertEquals(dummyUser, userDAO.getUsers().toArray()[0]);
     }
 
     @Test

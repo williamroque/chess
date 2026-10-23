@@ -8,6 +8,7 @@ import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.mindrot.jbcrypt.BCrypt;
 import service.AppService;
 import service.GameService;
 import service.UserService;
@@ -46,9 +47,9 @@ public class ServiceWithSQLTests {
 
     protected void populateDummyUsers() {
         try {
-            userDAO.createUser(new UserData("johnny", "1234", "johnny@email.com"));
-            userDAO.createUser(new UserData("megan", "4321", "megan@email.com"));
-            userDAO.createUser(new UserData("charlie", "4444", "charlie@email.com"));
+            userDAO.createUser(new UserData("johnny", BCrypt.hashpw("1234", BCrypt.gensalt()), "johnny@email.com"));
+            userDAO.createUser(new UserData("megan", BCrypt.hashpw("4321", BCrypt.gensalt()), "megan@email.com"));
+            userDAO.createUser(new UserData("charlie", BCrypt.hashpw("4444", BCrypt.gensalt()), "charlie@email.com"));
         } catch (Exception _) {
 
         }
