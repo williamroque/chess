@@ -121,12 +121,12 @@ public class ServerFacade {
         );
     }
 
-    public AuthData logout(AuthData data) throws FacadeException {
+    public void logout(AuthData data) throws FacadeException {
         String[] headers = {
                 "authorization", data.authToken()
         };
 
-        return sendRequest(
+        sendRequest(
                 "DELETE",
                 "/session",
                 null,
@@ -151,6 +151,27 @@ public class ServerFacade {
                 headers,
                 GameDataList.class,
                 Map.of(
+                        401, "Invalid authentication token.",
+                        500, "There was an internal server error while trying to get game list."
+                )
+        );
+    }
+
+    public GameData createGame(AuthData data, String gameName) throws FacadeException {
+        String[] headers = {
+                "authorization", data.authToken()
+        };
+
+        return sendRequest(
+                "POST",
+                "/game",
+                new Gson().toJson(Map.of(
+                        "gameName", gameName
+                )),
+                headers,
+                GameData.class,
+                Map.of(
+                        400, "Invalid game details.",
                         401, "Invalid authentication token.",
                         500, "There was an internal server error while trying to get game list."
                 )

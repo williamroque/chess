@@ -257,4 +257,24 @@ public class ServerFacadeTests {
 
         Assertions.assertEquals(401, thrownCode);
     }
+
+    @Test
+    public void createGameSuccessfullyTest() throws DataAccessException, FacadeException {
+        UserData dummyUser = new UserData(
+                "jenny",
+                "jennythegirl",
+                "jenny@gmail.com"
+        );
+        LoginResult loginResult = userService.register(dummyUser);
+        String authToken = loginResult.authToken();
+
+        Assertions.assertTrue(gameDAO.getGameList().games().isEmpty());
+
+        facade.createGame(
+                new AuthData(authToken, dummyUser.username()),
+                "game-123"
+        );
+
+        Assertions.assertFalse(gameDAO.getGameList().games().isEmpty());
+    }
 }
