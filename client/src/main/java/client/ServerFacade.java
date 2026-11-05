@@ -178,6 +178,29 @@ public class ServerFacade {
         );
     }
 
+    public GameData joinGame(AuthData data, String playerColor, int gameID) throws FacadeException {
+        String[] headers = {
+                "authorization", data.authToken()
+        };
+
+        return sendRequest(
+                "PUT",
+                "/game",
+                new Gson().toJson(Map.of(
+                        "playerColor", playerColor,
+                        "gameID", gameID
+                )),
+                headers,
+                GameData.class,
+                Map.of(
+                        400, "Invalid game details.",
+                        401, "Invalid authentication token.",
+                        403, "There is already someone playing under that color!",
+                        500, "There was an internal server error while trying to get game list."
+                )
+        );
+    }
+
     public ServerFacade(String baseURL) {
         if (!baseURL.endsWith("/")) {
             baseURL += "/";

@@ -313,4 +313,30 @@ public class ServerFacadeTests {
 
         Assertions.assertEquals(400, thrownCode);
     }
+
+    @Test
+    public void joinGameSuccessfullyTest() throws DataAccessException, FacadeException {
+        UserData dummyUser = new UserData(
+                "jenny",
+                "jennythegirl",
+                "jenny@gmail.com"
+        );
+        LoginResult loginResult = userService.register(dummyUser);
+        String authToken = loginResult.authToken();
+
+        GameData gameData = facade.createGame(
+                new AuthData(authToken, dummyUser.username()),
+                "game-123"
+        );
+
+        Assertions.assertNull(gameDAO.getGame(gameData.gameID()).whiteUsername());
+
+        facade.joinGame(
+                new AuthData(authToken, dummyUser.username()),
+                "WHITE",
+                gameData.gameID()
+        );
+
+        Assertions.assertEquals("jenny", gameDAO.getGame(gameData.gameID()).whiteUsername());
+    }
 }
