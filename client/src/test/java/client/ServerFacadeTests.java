@@ -291,4 +291,26 @@ public class ServerFacadeTests {
 
         Assertions.assertEquals(401, thrownCode);
     }
+
+    @Test
+    public void createGameBadRequestTest() throws DataAccessException {
+        UserData dummyUser = new UserData(
+                "jenny",
+                "jennythegirl",
+                "jenny@gmail.com"
+        );
+        LoginResult loginResult = userService.register(dummyUser);
+        String authToken = loginResult.authToken();
+
+        int thrownCode = 0;
+
+        try {
+            facade.createGame(new AuthData(authToken, dummyUser.username()), "");
+        } catch (FacadeException e) {
+            thrownCode = e.statusCode;
+            System.out.println(e.getMessage());
+        }
+
+        Assertions.assertEquals(400, thrownCode);
+    }
 }
