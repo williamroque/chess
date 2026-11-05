@@ -104,6 +104,21 @@ public class ServerFacade {
         );
     }
 
+    public AuthData login(UserData data) throws FacadeException {
+        return sendRequest(
+                "POST",
+                "/session",
+                new Gson().toJson(data),
+                null,
+                AuthData.class,
+                Map.of(
+                        400, "Invalid credentials format.",
+                        401, "Invalid login credentials.",
+                        500, "There was an internal server error while trying to log in."
+                )
+        );
+    }
+
     public ServerFacade(String baseURL) {
         if (!baseURL.endsWith("/")) {
             baseURL += "/";

@@ -5,6 +5,7 @@ import dataaccess.exceptions.DataAccessException;
 import dataaccess.sql.SQLAppDAO;
 import dataaccess.sql.SQLGameDAO;
 import dataaccess.sql.SQLUserDAO;
+import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -76,13 +77,14 @@ public class ServerFacadeTests {
 
     @Test
     public void registerSuccessfullyTest() throws FacadeException, DataAccessException {
-        facade.register(new UserData(
+        AuthData auth = facade.register(new UserData(
                 "marcus",
                 "marktheman",
                 "mark@yahoo.com"
         ));
 
         Assertions.assertNotNull(userDAO.getUser("marcus"));
+        Assertions.assertTrue(userDAO.authExists(auth.authToken()));
     }
 
     @Test
@@ -121,5 +123,20 @@ public class ServerFacadeTests {
         }
 
         Assertions.assertEquals(403, thrownCode);
+    }
+
+    @Test
+    public void loginSuccessfullyTest() throws FacadeException, DataAccessException {
+        UserData dummyUser = new UserData(
+                "jenny",
+                "jennythegirl",
+                "jenny@gmail.com"
+        );
+
+        userService.register(dummyUser);
+
+        AuthData auth = facade.login(dummyUser);
+
+        Assertions.assertTrue(auth != null && userDAO.authExists(auth.authToken()));
     }
 }
