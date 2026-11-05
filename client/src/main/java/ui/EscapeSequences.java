@@ -5,11 +5,16 @@ package ui;
  */
 public class EscapeSequences {
 
-    private static final String UNICODE_ESCAPE = "\u001b";
-    private static final String ANSI_ESCAPE = "\033";
+    public static final String UNICODE_ESCAPE = "\u001b";
+    public static final String ANSI_ESCAPE = "\033";
+
+    public static final String RESET_CURSOR = "\u001b[H";
 
     public static final String ERASE_SCREEN = UNICODE_ESCAPE + "[H" + UNICODE_ESCAPE + "[2J";
     public static final String ERASE_LINE = UNICODE_ESCAPE + "[2K";
+
+    public static final String ENTER_ALT_SCREEN = UNICODE_ESCAPE + "[?1049h";
+    public static final String EXIT_ALT_SCREEN  = UNICODE_ESCAPE + "[?1049l";
 
     public static final String SET_TEXT_BOLD = UNICODE_ESCAPE + "[1m";
     public static final String SET_TEXT_FAINT = UNICODE_ESCAPE + "[2m";

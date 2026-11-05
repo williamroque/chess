@@ -1,0 +1,111 @@
+package ui;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
+public class TerminalView {
+    protected ArrayList<TerminalViewRow> viewRows;
+
+    protected int width;
+    protected int height;
+
+    protected boolean mounted = false;
+
+    private static int[] getTerminalSize() {
+        int[] size = new int[]{80, 24}; // Default fallback if commands fail
+
+        try {
+            ProcessBuilder processBuilder;
+
+            if (System.getProperty("os.name").toLowerCase().contains("win")) {
+
+                processBuilder = new ProcessBuilder("cmd", "/c", "mode con");
+                Process process = processBuilder.start();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains("Columns:")) size[0] = Integer.parseInt(line.split(":")[1].trim());
+                    if (line.contains("Lines:"))   size[1] = Integer.parseInt(line.split(":")[1].trim());
+                }
+            } else {
+                processBuilder = new ProcessBuilder("sh", "-c", "stty size < /dev/tty");
+                Process process = processBuilder.start();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+                String[] output = reader.readLine().split(" ");
+                size[1] = Integer.parseInt(output[0]);
+                size[0] = Integer.parseInt(output[1]);
+            }
+        } catch (Exception e) {
+            // Silently fall back to default 80x24
+        }
+
+        return size;
+    }
+
+    public TerminalView() {
+        viewRows = new ArrayList<>();
+
+        int[] terminalSize = getTerminalSize();
+        width = terminalSize[0];
+        height = terminalSize[1];
+    }
+
+    protected TerminalViewRow createRow(int relativeHeight) {
+        TerminalViewRow row = new TerminalViewRow(relativeHeight, new ArrayList<>());
+        this.viewRows.add(row);
+
+        return row;
+    }
+
+    protected TerminalViewCell createCell(TerminalViewRow row, int relativeWidth) {
+        TerminalBuffer buffer = new TerminalBuffer(0, 0, 0, 0);
+
+        TerminalViewCell cell = new TerminalViewCell(relativeWidth, buffer);
+        row.row().add(cell);
+
+        return cell;
+    }
+
+    protected void resetLayout() {
+        double totalRowHeights = viewRows.stream()
+                .map(TerminalViewRow::relativeHeight)
+                .reduce(0, Integer::sum);
+
+        int rowOffset = 0;
+
+        for (TerminalViewRow row : viewRows) {
+            int rowHeight = (int) (row.relativeHeight() / totalRowHeights * height);
+
+            double totalCellWidths = row.row().stream()
+                    .map(TerminalViewCell::relativeWidth)
+                    .reduce(0, Integer::sum);
+
+            int cellOffset = 0;
+
+            for (TerminalViewCell cell : row.row()) {
+                int cellWidth = (int) (cell.relativeWidth() / totalCellWidths * width);
+
+                cell.buffer().setAnchor(rowOffset, cellOffset);
+                cell.buffer().setSize(cellWidth, rowHeight);
+
+                cellOffset += cellWidth;
+            }
+
+            rowOffset += rowHeight;
+        }
+    }
+
+    protected void eventLoop() {}
+
+    public void mount() {
+        mounted = true;
+        eventLoop();
+    }
+
+    public void unmount() {
+        mounted = false;
+    }
+}
