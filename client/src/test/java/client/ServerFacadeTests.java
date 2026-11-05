@@ -86,7 +86,23 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void registerAlreadyTakenTest() throws FacadeException, DataAccessException {
+    public void registerBadRequestTest() throws FacadeException {
+        UserData dummyUser = new UserData(null, null, null);
+
+        int thrownCode = 0;
+
+        try {
+            facade.register(dummyUser);
+        } catch (FacadeException e) {
+            thrownCode = e.statusCode;
+            System.out.println(e.getMessage());
+        }
+
+        Assertions.assertEquals(400, thrownCode);
+    }
+
+    @Test
+    public void registerAlreadyTakenTest() throws FacadeException {
         UserData dummyUser = new UserData(
                 "marcus",
                 "marktheman",
