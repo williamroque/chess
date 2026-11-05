@@ -71,7 +71,7 @@ public class ServerFacade {
             routeHttpError(statusCode, errorMessages);
         }
 
-        return new Gson().fromJson(response.body(), clazz);
+        return clazz == null ? null : new Gson().fromJson(response.body(), clazz);
     }
 
     public void clear() throws FacadeException {
