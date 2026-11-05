@@ -243,4 +243,18 @@ public class ServerFacadeTests {
                 facade.listGames(new AuthData(authToken, dummyUser.username()))
         );
     }
+
+    @Test
+    public void listGamesInvalidCredentialsTest() {
+        int thrownCode = 0;
+
+        try {
+           facade.listGames(new AuthData("FAKE-AUTH-TOKEN", null));
+        } catch (FacadeException e) {
+            thrownCode = e.statusCode;
+            System.out.println(e.getMessage());
+        }
+
+        Assertions.assertEquals(401, thrownCode);
+    }
 }
