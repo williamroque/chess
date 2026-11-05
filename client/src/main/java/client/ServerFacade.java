@@ -119,6 +119,24 @@ public class ServerFacade {
         );
     }
 
+    public AuthData logout(AuthData data) throws FacadeException {
+        String[] headers = {
+                "authorization", data.authToken()
+        };
+
+        return sendRequest(
+                "DELETE",
+                "/session",
+                null,
+                headers,
+                AuthData.class,
+                Map.of(
+                        401, "Invalid authentication token.",
+                        500, "There was an internal server error while trying to log out."
+                )
+        );
+    }
+
     public ServerFacade(String baseURL) {
         if (!baseURL.endsWith("/")) {
             baseURL += "/";

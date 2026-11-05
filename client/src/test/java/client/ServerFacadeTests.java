@@ -12,6 +12,7 @@ import server.Server;
 import service.AppService;
 import service.GameService;
 import service.UserService;
+import service.results.LoginResult;
 
 
 public class ServerFacadeTests {
@@ -180,5 +181,22 @@ public class ServerFacadeTests {
         }
 
         Assertions.assertEquals(401, thrownCode);
+    }
+
+    @Test
+    public void logoutSuccessfullyTest() throws FacadeException, DataAccessException {
+        UserData dummyUser = new UserData(
+                "jenny",
+                "jennythegirl",
+                "jenny@gmail.com"
+        );
+        LoginResult loginResult = userService.register(dummyUser);
+        String authToken = loginResult.authToken();
+
+        Assertions.assertTrue(userDAO.authExists(authToken));
+
+        facade.logout(new AuthData(authToken, "jenny"));
+
+        Assertions.assertFalse(userDAO.authExists(authToken));
     }
 }
