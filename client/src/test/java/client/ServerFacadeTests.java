@@ -88,7 +88,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void registerBadRequestTest() throws FacadeException {
+    public void registerBadRequestTest() {
         UserData dummyUser = new UserData(null, null, null);
 
         int thrownCode = 0;
@@ -138,5 +138,21 @@ public class ServerFacadeTests {
         AuthData auth = facade.login(dummyUser);
 
         Assertions.assertTrue(auth != null && userDAO.authExists(auth.authToken()));
+    }
+
+    @Test
+    public void loginBadRequestTest() {
+        UserData dummyUser = new UserData(null, null, null);
+
+        int thrownCode = 0;
+
+        try {
+            facade.login(dummyUser);
+        } catch (FacadeException e) {
+            thrownCode = e.statusCode;
+            System.out.println(e.getMessage());
+        }
+
+        Assertions.assertEquals(400, thrownCode);
     }
 }
