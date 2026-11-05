@@ -277,4 +277,18 @@ public class ServerFacadeTests {
 
         Assertions.assertFalse(gameDAO.getGameList().games().isEmpty());
     }
+
+    @Test
+    public void createGameInvalidCredentialsTest() {
+        int thrownCode = 0;
+
+        try {
+            facade.createGame(new AuthData("FAKE-AUTH-TOKEN", null), "game-123");
+        } catch (FacadeException e) {
+            thrownCode = e.statusCode;
+            System.out.println(e.getMessage());
+        }
+
+        Assertions.assertEquals(401, thrownCode);
+    }
 }
