@@ -199,4 +199,28 @@ public class ServerFacadeTests {
 
         Assertions.assertFalse(userDAO.authExists(authToken));
     }
+
+    @Test
+    public void logoutInvalidCredentialsTest() throws DataAccessException {
+        UserData dummyUser = new UserData(
+                "jenny",
+                "jennythegirl",
+                "jenny@gmail.com"
+        );
+        LoginResult loginResult = userService.register(dummyUser);
+        String authToken = loginResult.authToken();
+
+        Assertions.assertTrue(userDAO.authExists(authToken));
+
+        int thrownCode = 0;
+
+        try {
+            facade.logout(new AuthData("FAKE-AUTH-TOKEN", "jenny"));
+        } catch (FacadeException e) {
+            thrownCode = e.statusCode;
+            System.out.println(e.getMessage());
+        }
+
+        Assertions.assertEquals(401, thrownCode);
+    }
 }
