@@ -155,4 +155,30 @@ public class ServerFacadeTests {
 
         Assertions.assertEquals(400, thrownCode);
     }
+
+    @Test
+    public void loginInvalidCredentialsTest() throws FacadeException {
+        UserData dummyUser = new UserData(
+                "marcus",
+                "marktheman",
+                "mark@yahoo.com"
+        );
+
+        facade.register(dummyUser);
+
+        int thrownCode = 0;
+
+        try {
+            facade.login(new UserData(
+                    "marcus",
+                    "johnnytheguy",
+                    "mark@yahoo.com"
+            ));
+        } catch (FacadeException e) {
+            thrownCode = e.statusCode;
+            System.out.println(e.getMessage());
+        }
+
+        Assertions.assertEquals(401, thrownCode);
+    }
 }
