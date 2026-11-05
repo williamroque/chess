@@ -4,6 +4,8 @@ import client.exceptions.FacadeException;
 import client.exceptions.GenericHttpErrorException;
 import com.google.gson.Gson;
 import model.AuthData;
+import model.GameData;
+import model.GameDataList;
 import model.UserData;
 
 import java.net.URI;
@@ -133,6 +135,24 @@ public class ServerFacade {
                 Map.of(
                         401, "Invalid authentication token.",
                         500, "There was an internal server error while trying to log out."
+                )
+        );
+    }
+
+    public GameDataList listGames(AuthData data) throws FacadeException {
+        String[] headers = {
+                "authorization", data.authToken()
+        };
+
+        return sendRequest(
+                "GET",
+                "/game",
+                null,
+                headers,
+                GameDataList.class,
+                Map.of(
+                        401, "Invalid authentication token.",
+                        500, "There was an internal server error while trying to get game list."
                 )
         );
     }

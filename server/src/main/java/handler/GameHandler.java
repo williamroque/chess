@@ -5,6 +5,7 @@ import dataaccess.exceptions.AlreadyTakenException;
 import dataaccess.exceptions.AuthTokenNotFoundException;
 import io.javalin.http.Context;
 import model.GameData;
+import model.GameDataList;
 import server.InvalidRequestException;
 import service.GameService;
 import service.UserService;
@@ -31,9 +32,9 @@ public class GameHandler extends Handler {
         String authToken = ctx.header("authorization");
 
         try {
-            Collection<GameData> games = gameService.listGames(authToken);
+            GameDataList games = gameService.listGames(authToken);
             ctx.status(200);
-            ctx.json(Map.of("games", games));
+            ctx.json(games);
         } catch(AuthTokenNotFoundException _) {
             ctx.status(401);
             ctx.json("{ \"message\": \"Error: unauthorized\" }");

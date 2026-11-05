@@ -3,6 +3,7 @@ package shared;
 import chess.ChessGame;
 import dataaccess.exceptions.*;
 import model.GameData;
+import model.GameDataList;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ abstract public class GameServiceTests extends ServiceTests {
 
         String dummyAuthToken = "1234-4312-1234-0175";
 
-        Collection<GameData> gameList = new ArrayList<>();
+        GameDataList gameList = new GameDataList(new ArrayList<>());
 
         try {
             gameList = gameService.listGames(dummyAuthToken);
@@ -76,7 +77,7 @@ abstract public class GameServiceTests extends ServiceTests {
 
         }
 
-        Assertions.assertArrayEquals(dummyGames.toArray(), gameList.toArray());
+        Assertions.assertArrayEquals(dummyGames.toArray(), gameList.games().toArray());
     }
 
     @Test
@@ -118,7 +119,7 @@ abstract public class GameServiceTests extends ServiceTests {
 
         String dummyAuthToken = "1234-4312-1234-0175";
 
-        Assertions.assertEquals(0, gameDAO.getGameList().size());
+        Assertions.assertEquals(0, gameDAO.getGameList().games().size());
 
         try {
             gameService.createGame(dummyAuthToken, "game123");
@@ -126,7 +127,7 @@ abstract public class GameServiceTests extends ServiceTests {
 
         }
 
-        Assertions.assertEquals(1, gameDAO.getGameList().size());
+        Assertions.assertEquals(1, gameDAO.getGameList().games().size());
     }
 
     @Test
@@ -138,7 +139,7 @@ abstract public class GameServiceTests extends ServiceTests {
 
         String dummyAuthToken = "1234-4312-1234-0175";
 
-        Assertions.assertEquals(0, gameDAO.getGameList().size());
+        Assertions.assertEquals(0, gameDAO.getGameList().games().size());
 
         GameData dummyData = new GameData(
                 1,

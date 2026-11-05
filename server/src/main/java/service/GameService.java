@@ -5,6 +5,7 @@ import dataaccess.GameDAO;
 import dataaccess.UserDAO;
 import dataaccess.exceptions.*;
 import model.GameData;
+import model.GameDataList;
 
 import java.util.*;
 
@@ -17,7 +18,7 @@ public class GameService {
         this.userDAO = userDAO;
     }
 
-    public Collection<GameData> listGames(String authToken) throws DataAccessException {
+    public GameDataList listGames(String authToken) throws DataAccessException {
         if (!userDAO.authExists(authToken)) {
             throw new AuthTokenNotFoundException("Auth token not found.");
         }

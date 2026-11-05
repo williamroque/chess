@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataaccess.GameDAO;
 import dataaccess.exceptions.GameNotFoundException;
 import model.GameData;
+import model.GameDataList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,8 +14,8 @@ public class MemoryGameDAO implements GameDAO {
     HashMap<Integer, GameData> games = new HashMap<>();
 
     @Override
-    public Collection<GameData> getGameList() {
-        return games.values();
+    public GameDataList getGameList() {
+        return new GameDataList(games.values());
     }
 
     @Override

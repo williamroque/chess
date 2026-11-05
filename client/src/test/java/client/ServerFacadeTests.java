@@ -6,6 +6,7 @@ import dataaccess.sql.SQLAppDAO;
 import dataaccess.sql.SQLGameDAO;
 import dataaccess.sql.SQLUserDAO;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -222,5 +223,24 @@ public class ServerFacadeTests {
         }
 
         Assertions.assertEquals(401, thrownCode);
+    }
+
+    @Test
+    public void listGamesSuccessfullyTest() throws FacadeException, DataAccessException {
+        UserData dummyUser = new UserData(
+                "jenny",
+                "jennythegirl",
+                "jenny@gmail.com"
+        );
+        LoginResult loginResult = userService.register(dummyUser);
+        String authToken = loginResult.authToken();
+
+        gameService.createGame(authToken, "game-1");
+        gameService.createGame(authToken, "game-2");
+
+        Assertions.assertEquals(
+                gameService.listGames(authToken),
+                facade.listGames(new AuthData(authToken, dummyUser.username()))
+        );
     }
 }

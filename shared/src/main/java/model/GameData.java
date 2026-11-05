@@ -9,3 +9,4 @@ public record GameData(
         String gameName,
         ChessGame game
 ) { }
+

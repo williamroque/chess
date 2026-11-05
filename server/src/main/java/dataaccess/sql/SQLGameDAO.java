@@ -7,6 +7,7 @@ import dataaccess.GameDAO;
 import dataaccess.exceptions.DataAccessException;
 import dataaccess.exceptions.GameNotFoundException;
 import model.GameData;
+import model.GameDataList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,8 +31,8 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public Collection<GameData> getGameList() throws DataAccessException {
-        return executeReturnGames("SELECT * FROM games");
+    public GameDataList getGameList() throws DataAccessException {
+        return new GameDataList(executeReturnGames("SELECT * FROM games"));
     }
 
     @Override
