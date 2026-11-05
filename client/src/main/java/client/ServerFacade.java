@@ -1,12 +1,14 @@
 package client;
 
+import client.exceptions.FacadeException;
+import client.exceptions.GenericHttpErrorException;
 import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Map;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -28,7 +30,21 @@ public class ServerFacade {
         return URI.create(baseURL).resolve(path);
     }
 
-    private <T> T sendRequest(String method, String path, String body, String[] headers, Class<T> clazz) throws IOException, InterruptedException {
+    public void routeHttpError(int statusCode, Map<Integer, String> messages) throws FacadeException {
+        if (messages.containsKey(statusCode)) {
+            throw new FacadeException(messages.get(statusCode));
+        }
+        throw new FacadeException("There was an issue communicating with the server.");
+    }
+
+    private <T> T sendRequest(
+            String method,
+            String path,
+            String body,
+            String[] headers,
+            Class<T> clazz,
+            Map<Integer, String> errorMessages
+    ) throws FacadeException {
         HttpRequest.Builder requestDraft = HttpRequest.newBuilder()
                 .uri(buildURI(path))
                 .method(method, requestBodyPublisher(body));
@@ -38,19 +54,37 @@ public class ServerFacade {
         }
 
         HttpRequest request = requestDraft.build();
+        HttpResponse<String> response;
 
-        HttpResponse<String> response = client.send(
-                request,
-                HttpResponse.BodyHandlers.ofString()
-        );
+        try {
+            response = client.send(
+                    request,
+                    HttpResponse.BodyHandlers.ofString()
+            );
+        } catch (Exception e) {
+            throw new FacadeException("There was an issue connecting with the server.");
+        }
 
         int statusCode = response.statusCode();
 
         if (statusCode < 200 || statusCode >= 300) {
-            throw new GenericHttpErrorException(statusCode);
+            routeHttpError(statusCode, errorMessages);
         }
 
         return new Gson().fromJson(response.body(), clazz);
+    }
+
+    public void clear() throws FacadeException {
+        sendRequest(
+                "DELETE",
+                "/db",
+                null,
+                null,
+                null,
+                Map.of(
+                        500, "There was an internal server error while trying to clear the database."
+                )
+        );
     }
 
     public ServerFacade(String baseURL) {

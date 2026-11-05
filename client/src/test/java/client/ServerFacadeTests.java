@@ -1,11 +1,7 @@
 package client;
 
-import model.AuthData;
-import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
-
-import java.io.IOException;
 
 
 public class ServerFacadeTests {
@@ -28,9 +24,9 @@ public class ServerFacadeTests {
         server.stop();
     }
 
-
     @Test
-    public void sampleTest() {
+    public void clear() {
+
     }
 
 }

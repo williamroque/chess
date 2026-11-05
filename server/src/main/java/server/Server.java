@@ -1,11 +1,6 @@
 package server;
 
-import com.google.gson.Gson;
 import dataaccess.DatabaseManager;
-import dataaccess.exceptions.DataAccessException;
-import dataaccess.memory.MemoryAppDAO;
-import dataaccess.memory.MemoryGameDAO;
-import dataaccess.memory.MemoryUserDAO;
 import dataaccess.sql.SQLAppDAO;
 import dataaccess.sql.SQLGameDAO;
 import dataaccess.sql.SQLUserDAO;
@@ -13,7 +8,6 @@ import handler.AppHandler;
 import handler.GameHandler;
 import handler.UserHandler;
 import io.javalin.*;
-import io.javalin.http.Context;
 import io.javalin.json.JavalinGson;
 import service.AppService;
 import service.GameService;
