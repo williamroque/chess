@@ -3,6 +3,7 @@ package handler;
 import chess.ChessGame;
 import dataaccess.exceptions.AlreadyTakenException;
 import dataaccess.exceptions.AuthTokenNotFoundException;
+import dataaccess.exceptions.GameNotFoundException;
 import io.javalin.http.Context;
 import model.GameData;
 import model.GameDataList;
@@ -108,6 +109,9 @@ public class GameHandler extends Handler {
             );
             ctx.status(200);
             ctx.json("{}");
+        } catch(GameNotFoundException _) {
+            ctx.status(400);
+            ctx.json("{ \"message\": \"Error: bad request\" }");
         } catch(AuthTokenNotFoundException _) {
             ctx.status(401);
             ctx.json("{ \"message\": \"Error: unauthorized\" }");

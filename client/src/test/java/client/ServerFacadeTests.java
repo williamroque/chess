@@ -339,4 +339,104 @@ public class ServerFacadeTests {
 
         Assertions.assertEquals("jenny", gameDAO.getGame(gameData.gameID()).whiteUsername());
     }
+
+    @Test
+    public void joinGameBadRequestTest() throws DataAccessException, FacadeException {
+        UserData dummyUser = new UserData(
+                "jenny",
+                "jennythegirl",
+                "jenny@gmail.com"
+        );
+        LoginResult loginResult = userService.register(dummyUser);
+        String authToken = loginResult.authToken();
+
+        GameData gameData = facade.createGame(
+                new AuthData(authToken, dummyUser.username()),
+                "game-123"
+        );
+
+        int thrownCode = 0;
+
+        try {
+            facade.joinGame(
+                    new AuthData(authToken, dummyUser.username()),
+                    "WHITE",
+                    1000
+            );
+        } catch (FacadeException e) {
+            thrownCode = e.statusCode;
+            System.out.println(e.getMessage());
+        }
+
+        Assertions.assertEquals(400, thrownCode);
+
+        thrownCode = 0;
+
+        try {
+            facade.joinGame(
+                    new AuthData(authToken, dummyUser.username()),
+                    "BROWN",
+                    gameData.gameID()
+            );
+        } catch (FacadeException e) {
+            thrownCode = e.statusCode;
+            System.out.println(e.getMessage());
+        }
+
+        Assertions.assertEquals(400, thrownCode);
+    }
+
+    @Test
+    public void joinGameInvalidCredentialsTest() {
+        int thrownCode = 0;
+
+        try {
+            facade.joinGame(
+                    new AuthData("FAKE-AUTH-TOKEN", null),
+                    "WHITE",
+                    123
+            );
+        } catch (FacadeException e) {
+            thrownCode = e.statusCode;
+            System.out.println(e.getMessage());
+        }
+
+        Assertions.assertEquals(401, thrownCode);
+    }
+
+    @Test
+    public void joinGameAlreadyTakenTest() throws DataAccessException, FacadeException {
+        UserData dummyUser = new UserData(
+                "jenny",
+                "jennythegirl",
+                "jenny@gmail.com"
+        );
+        LoginResult loginResult = userService.register(dummyUser);
+        String authToken = loginResult.authToken();
+
+        GameData gameData = facade.createGame(
+                new AuthData(authToken, dummyUser.username()),
+                "game-123"
+        );
+        facade.joinGame(
+                new AuthData(authToken, dummyUser.username()),
+                "WHITE",
+                gameData.gameID()
+        );
+
+        int thrownCode = 0;
+
+        try {
+            facade.joinGame(
+                    new AuthData(authToken, dummyUser.username()),
+                    "WHITE",
+                    gameData.gameID()
+            );
+        } catch (FacadeException e) {
+            thrownCode = e.statusCode;
+            System.out.println(e.getMessage());
+        }
+
+        Assertions.assertEquals(403, thrownCode);
+    }
 }
