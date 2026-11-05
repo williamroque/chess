@@ -74,4 +74,14 @@ public class ServerFacadeTests {
         Assertions.assertTrue(userDAO.getUsers().isEmpty());
     }
 
+    @Test
+    public void registerSuccessfullyTest() throws FacadeException, DataAccessException {
+        facade.register(new UserData(
+                "marcus",
+                "marktheman",
+                "mark@yahoo.com"
+        ));
+
+        Assertions.assertNotNull(userDAO.getUser("marcus"));
+    }
 }

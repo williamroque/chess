@@ -3,6 +3,8 @@ package client;
 import client.exceptions.FacadeException;
 import client.exceptions.GenericHttpErrorException;
 import com.google.gson.Gson;
+import model.AuthData;
+import model.UserData;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -32,9 +34,9 @@ public class ServerFacade {
 
     public void routeHttpError(int statusCode, Map<Integer, String> messages) throws FacadeException {
         if (messages.containsKey(statusCode)) {
-            throw new FacadeException(messages.get(statusCode));
+            throw new FacadeException(messages.get(statusCode), statusCode);
         }
-        throw new FacadeException("There was an issue communicating with the server.");
+        throw new FacadeException("There was an issue communicating with the server.", statusCode);
     }
 
     private <T> T sendRequest(
@@ -62,7 +64,7 @@ public class ServerFacade {
                     HttpResponse.BodyHandlers.ofString()
             );
         } catch (Exception e) {
-            throw new FacadeException("There was an issue connecting with the server.");
+            throw new FacadeException("There was an issue connecting with the server.", 500);
         }
 
         int statusCode = response.statusCode();
@@ -83,6 +85,21 @@ public class ServerFacade {
                 null,
                 Map.of(
                         500, "There was an internal server error while trying to clear the database."
+                )
+        );
+    }
+
+    public AuthData register(UserData data) throws FacadeException {
+        return sendRequest(
+                "POST",
+                "/user",
+                new Gson().toJson(data),
+                null,
+                AuthData.class,
+                Map.of(
+                        400, "Invalid registration details.",
+                        403, "This username is already taken!",
+                        500, "There was an internal server error while trying to register."
                 )
         );
     }
