@@ -84,4 +84,26 @@ public class ServerFacadeTests {
 
         Assertions.assertNotNull(userDAO.getUser("marcus"));
     }
+
+    @Test
+    public void registerAlreadyTakenTest() throws FacadeException, DataAccessException {
+        UserData dummyUser = new UserData(
+                "marcus",
+                "marktheman",
+                "mark@yahoo.com"
+        );
+
+        facade.register(dummyUser);
+
+        int thrownCode = 0;
+
+        try {
+            facade.register(dummyUser);
+        } catch (FacadeException e) {
+            thrownCode = e.statusCode;
+            System.out.println(e.getMessage());
+        }
+
+        Assertions.assertEquals(403, thrownCode);
+    }
 }
