@@ -1,11 +1,16 @@
 package ui;
 
+import client.ServerFacade;
+import client.exceptions.FacadeException;
 import model.AuthData;
+import model.UserData;
 
 import java.util.*;
 import java.util.function.Consumer;
 
 public class REPLTerminalView extends TerminalView {
+    ServerFacade facade;
+
     TerminalBuffer replBuffer;
     TerminalBuffer welcomeBuffer;
 
@@ -44,8 +49,10 @@ public class REPLTerminalView extends TerminalView {
         ));
     }
 
-    public REPLTerminalView() {
+    public REPLTerminalView(ServerFacade facade) {
         super();
+
+        this.facade = facade;
 
         TerminalViewRow welcomeRow = createRow(11);
         TerminalViewCell welcomeCell = createCell(welcomeRow, 100);
@@ -103,22 +110,54 @@ public class REPLTerminalView extends TerminalView {
         unmount();
     }
 
+    private void registerHandler(List<String> arguments) {
+        if (arguments.size() != 3) {
+            showError("Wrong number of arguments for `register`.");
+            showError("▸ register <user> <pass> <email>");
+            return;
+        }
+
+        try {
+            currentAuth = facade.register(new UserData(
+                    arguments.get(0),
+                    arguments.get(1),
+                    arguments.get(2)
+            ));
+        } catch (FacadeException e) {
+            showError(e.getMessage());
+        }
+    }
+
     private void initializeCommands() {
         registerCommand("help", this::helpHandler);
         registerCommand("quit", this::quitHandler);
+        registerCommand("register", this::registerHandler);
     }
 
     private void parseCommand(String command) throws InvalidCommandException {
         command = command.toLowerCase().trim();
 
         List<String> commandParts = List.of(command.split(" "));
+        String commandBase = commandParts.getFirst();
 
-        if (commands.containsKey(commandParts.getFirst())) {
-            Consumer<List<String>> callback = commands.get(command);
+        if (commands.containsKey(commandBase)) {
+            Consumer<List<String>> callback = commands.get(commandBase);
             callback.accept(commandParts.subList(1, commandParts.size()));
         } else {
             throw new InvalidCommandException("Invalid command.");
         }
+    }
+
+    private void showError(String message) {
+        addLine(
+                message,
+                new TerminalBuffer.Decoration(
+                        null,
+                        TerminalBuffer.Color.MAGENTA,
+                        TerminalBuffer.Style.BOLD,
+                        0
+                )
+        );
     }
 
     private void renderLines(ArrayList<REPLLine> lines, TerminalBuffer buffer) {
@@ -170,8 +209,12 @@ public class REPLTerminalView extends TerminalView {
         Scanner scanner = new Scanner(System.in);
 
         while (mounted) {
+            String loginIndicator = currentAuth == null
+                    ? "[Logged out] ♟ ❯"
+                    : "[" + currentAuth.username() + "] ♚ ❯";
+
             addLine(
-                    ">>> |",
+                    loginIndicator + " |",
                     new TerminalBuffer.Decoration(
                             null,
                             null,
@@ -200,17 +243,9 @@ public class REPLTerminalView extends TerminalView {
             try {
                 parseCommand(line);
             } catch (InvalidCommandException _) {
-                addLine(
-                        "Unknown command or invalid usage: `"
-                                + line.split(" ")[0]
-                                + "`. Type `help` to get a list of possible commands.",
-                        new TerminalBuffer.Decoration(
-                                null,
-                                TerminalBuffer.Color.MAGENTA,
-                                TerminalBuffer.Style.BOLD,
-                                0
-                        )
-                );
+                showError("Unknown command or invalid usage: `"
+                        + line.split(" ")[0]
+                        + "`. Type `help` to get a list of possible commands.");
             }
         }
     }
