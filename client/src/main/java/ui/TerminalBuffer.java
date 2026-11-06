@@ -6,7 +6,7 @@ public class TerminalBuffer {
     private int anchorRow;
     private int anchorCol;
 
-    private final char[][] buffer;
+    private char[][] buffer;
 
     StringBuilder outputBuilder;
 
@@ -16,7 +16,7 @@ public class TerminalBuffer {
         this.anchorRow = anchorRow;
         this.anchorCol = anchorCol;
 
-        buffer = new char[width][height];
+        buffer = new char[height][width];
         outputBuilder = new StringBuilder((width + 1) * height + 10);
     }
 
@@ -39,16 +39,10 @@ public class TerminalBuffer {
 
     public void render() {
         outputBuilder.setLength(0);
-        outputBuilder.append(
-                EscapeSequences.moveCursorToLocation(anchorRow + 1, anchorCol + 1)
-        );
 
         for (int i = 0; i < height; i++) {
+            outputBuilder.append(EscapeSequences.moveCursorToLocation(anchorRow + i + 1, anchorCol + 1));
             outputBuilder.append(buffer[i]);
-
-            if (i < height - 1) {
-                outputBuilder.append('\n');
-            }
         }
 
         System.out.print(outputBuilder.toString());
@@ -66,6 +60,9 @@ public class TerminalBuffer {
     public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
+
+        buffer = new char[height][width];
+        outputBuilder = new StringBuilder((width + 1) * height + 10);
     }
 
     public void setAnchor(int anchorRow, int anchorCol) {

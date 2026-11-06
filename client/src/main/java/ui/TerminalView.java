@@ -69,6 +69,17 @@ public class TerminalView {
         return cell;
     }
 
+    protected void clearView() {
+        System.out.print(EscapeSequences.ERASE_SCREEN);
+        System.out.print(EscapeSequences.RESET_CURSOR);
+        System.out.flush();
+    }
+
+    protected void moveCursor(int row, int col) {
+        System.out.print(EscapeSequences.moveCursorToLocation(row + 1, col + 1));
+        System.out.flush();
+    }
+
     protected void resetLayout() {
         double totalRowHeights = viewRows.stream()
                 .map(TerminalViewRow::relativeHeight)
