@@ -128,10 +128,29 @@ public class REPLTerminalView extends TerminalView {
         }
     }
 
+    private void loginHandler(List<String> arguments) {
+        if (arguments.size() != 2) {
+            showError("Wrong number of arguments for `login`.");
+            showError("▸ register <user> <pass>");
+            return;
+        }
+
+        try {
+            currentAuth = facade.login(new UserData(
+                    arguments.get(0),
+                    arguments.get(1),
+                    null
+            ));
+        } catch (FacadeException e) {
+            showError(e.getMessage());
+        }
+    }
+
     private void initializeCommands() {
         registerCommand("help", this::helpHandler);
         registerCommand("quit", this::quitHandler);
         registerCommand("register", this::registerHandler);
+        registerCommand("login", this::loginHandler);
     }
 
     private void parseCommand(String command) throws InvalidCommandException {
