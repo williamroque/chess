@@ -56,15 +56,28 @@ public class GameTerminalView extends REPLTerminalView {
                 .getBoardConfiguration();
 
         if (gameState.getTeam() == ChessGame.TeamColor.BLACK) {
-            int start = 0;
-            int end = board.length - 1;
+            int boardStart = 0;
+            int boardEnd = board.length - 1;
 
-            while (start < end) {
-                ChessPiece[] temp = board[start];
-                board[start] = board[end];
-                board[end] = temp;
-                start++;
-                end--;
+            while (boardStart < boardEnd) {
+                ChessPiece[] temp = board[boardStart];
+                board[boardStart] = board[boardEnd];
+                board[boardEnd] = temp;
+                boardStart++;
+                boardEnd--;
+            }
+
+            for (ChessPiece[] row : board) {
+                int start = 0;
+                int end = board.length - 1;
+
+                while (start < end) {
+                    ChessPiece temp = row[start];
+                    row[start] = row[end];
+                    row[end] = temp;
+                    start++;
+                    end--;
+                }
             }
         }
 
@@ -91,17 +104,29 @@ public class GameTerminalView extends REPLTerminalView {
 
         boardBuffer.clearBuffer();
 
-        boardBuffer.writeToBuffer(1, 4, "a  b  c  d  e  f  g  h", indexDecoration);
+        if (gameState.getTeam() == ChessGame.TeamColor.WHITE) {
+            boardBuffer.writeToBuffer(1, 4, "a  b  c  d  e  f  g  h", indexDecoration);
+        } else {
+            boardBuffer.writeToBuffer(1, 4, "h  g  f  e  d  c  b  a", indexDecoration);
+        }
 
         int currentRow = 2;
 
         for (ChessPiece[] row : board) {
             int currentCol = 1;
 
-            boardBuffer.writeToBuffer(currentRow, 1, String.valueOf(currentRow - 1), indexDecoration);
+            String currentIndex;
+
+            if (gameState.getTeam() == ChessGame.TeamColor.WHITE) {
+                currentIndex = String.valueOf(10 - currentRow);
+            } else {
+                currentIndex = String.valueOf(currentRow - 1);
+            }
+
+            boardBuffer.writeToBuffer(currentRow, 1, currentIndex, indexDecoration);
 
             for (ChessPiece piece : row) {
-                TerminalBuffer.Decoration currentDecoration = (currentRow + currentCol) % 2 == 0
+                TerminalBuffer.Decoration currentDecoration = (currentRow + currentCol) % 2 == 1
                         ? whiteDecoration
                         : blackDecoration;
 
@@ -122,12 +147,16 @@ public class GameTerminalView extends REPLTerminalView {
                 currentCol++;
             }
 
-            boardBuffer.writeToBuffer(currentRow, currentCol * 3 + 1, String.valueOf(currentRow - 1), indexDecoration);
+            boardBuffer.writeToBuffer(currentRow, currentCol * 3 + 1, currentIndex, indexDecoration);
 
             currentRow++;
         }
 
-        boardBuffer.writeToBuffer(currentRow, 4, "a  b  c  d  e  f  g  h", indexDecoration);
+        if (gameState.getTeam() == ChessGame.TeamColor.WHITE) {
+            boardBuffer.writeToBuffer(currentRow, 4, "a  b  c  d  e  f  g  h", indexDecoration);
+        } else {
+            boardBuffer.writeToBuffer(currentRow, 4, "h  g  f  e  d  c  b  a", indexDecoration);
+        }
 
         boardBuffer.render();
     }
