@@ -60,10 +60,52 @@ public class REPLTerminalView extends TerminalView {
 
         replLines = new ArrayList<>();
         commands = new HashMap<>();
+
+        initializeCommands();
     }
 
     private void registerCommand(String command, Consumer<List<String>> callback) {
         commands.put(command, callback);
+    }
+
+    private void helpHandler(List<String> arguments) {
+        TerminalBuffer.Decoration header = new TerminalBuffer.Decoration(
+                null,
+                TerminalBuffer.Color.WHITE,
+                TerminalBuffer.Style.BOLD,
+                0
+        );
+        TerminalBuffer.Decoration divider = new TerminalBuffer.Decoration(
+                null,
+                TerminalBuffer.Color.DARK_GREY,
+                TerminalBuffer.Style.FAINT,
+                0
+        );
+        TerminalBuffer.Decoration body = new TerminalBuffer.Decoration(
+                null,
+                TerminalBuffer.Color.BLUE,
+                null,
+                0
+        );
+
+         replLines.addAll(List.of(
+                 new REPLLine("♟  COMMANDS & USAGE", header),
+                 new REPLLine("────────────────────────────────────────────────────────────", divider),
+                 new REPLLine("▸ register <user> <pass> <email>   Create an account", body),
+                 new REPLLine("▸ login    <user> <pass>           Sign in to play", body),
+                 new REPLLine("▸ help                             Show available commands", body),
+                 new REPLLine("▸ quit                             Resign / exit the program", body),
+                 new REPLLine("────────────────────────────────────────────────────────────", divider)
+        ));
+    }
+
+    private void quitHandler(List<String> arguments) {
+        unmount();
+    }
+
+    private void initializeCommands() {
+        registerCommand("help", this::helpHandler);
+        registerCommand("quit", this::quitHandler);
     }
 
     private void parseCommand(String command) throws InvalidCommandException {
