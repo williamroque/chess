@@ -12,7 +12,12 @@ public class REPLTerminalView extends TerminalView {
 
     HashMap<String, Consumer<List<String>>> commands;
 
-    ArrayList<String> lines;
+    private record REPLLine (
+            String content,
+            TerminalBuffer.Decoration decoration
+    ) {}
+
+    ArrayList<REPLLine> lines;
 
     public REPLTerminalView() {
         super();
@@ -24,13 +29,29 @@ public class REPLTerminalView extends TerminalView {
 
         replBuffer = cell.buffer();
         lines = new ArrayList<>();
+        commands = new HashMap<>();
     }
 
     private void printWelcome() {
+        TerminalBuffer.Decoration italic = new TerminalBuffer.Decoration(
+                null,
+                null,
+                TerminalBuffer.Style.ITALIC,
+                0
+        );
+
         lines.addAll(List.of(
-                "Welcome to the CS 240 Chess Game!",
-                ">>> Type Help to get started. <<<",
-                ""
+                new REPLLine("┌──────────────────────────────────────────────┐", null),
+                new REPLLine("│  ♟   CS 240 CHESS — TERMINAL EDITION   ♙     │", null),
+                new REPLLine("├──────────────────────────────────────────────┤", null),
+                new REPLLine("│                                              │", null),
+                new REPLLine("│   \"The supreme art of war is to              │", italic),
+                new REPLLine("│    subdue the enemy without fighting.\"       │", italic),
+                new REPLLine("│                                              │", null),
+                new REPLLine("│   ▸ help   Show commands & rules             │", null),
+                new REPLLine("│                                              │", null),
+                new REPLLine("└──────────────────────────────────────────────┘", null),
+                new REPLLine("", null)
         ));
     }
 
@@ -57,21 +78,22 @@ public class REPLTerminalView extends TerminalView {
 
         int height = replBuffer.getSize()[1];
         int limit = Math.min(lines.size(), height);
-        List<String> visibleLines = lines.subList(lines.size() - limit, lines.size());
+        List<REPLLine> visibleLines = lines.subList(lines.size() - limit, lines.size());
 
         int[] cursorPosition = {0, 0};
 
         for (int i = 0; i < visibleLines.size(); i++) {
-            String line = visibleLines.get(i);
+            REPLLine line = visibleLines.get(i);
+            String content = line.content();
 
-            int pipeIndex = line.indexOf('|');
+            int pipeIndex = content.indexOf('|');
             if (pipeIndex > -1) {
                 cursorPosition[0] = i;
                 cursorPosition[1] = pipeIndex;
 
-                line = line.replace("|", "");
+                content = content.replace("|", "");
             }
-            replBuffer.writeToBuffer(i, 0, line);
+            replBuffer.writeToBuffer(i, 0, content, line.decoration());
         }
 
         replBuffer.render();
@@ -83,8 +105,17 @@ public class REPLTerminalView extends TerminalView {
         );
     }
 
-    private void addLines(String... newLines) {
-        lines.addAll(Arrays.asList(newLines));
+    private void addLine(String content, TerminalBuffer.Decoration decoration) {
+        lines.add(new REPLLine(content, decoration));
+        renderLines();
+    }
+
+    private void appendLine(String content, TerminalBuffer.Decoration decoration) {
+        REPLLine lastLine = lines.removeLast();
+        lines.add(new REPLLine(
+                lastLine.content() + content,
+                decoration
+        ));
         renderLines();
     }
 
@@ -95,11 +126,28 @@ public class REPLTerminalView extends TerminalView {
         Scanner scanner = new Scanner(System.in);
 
         while (mounted) {
-            addLines(">>> |");
+            addLine(
+                    ">>> |",
+                    new TerminalBuffer.Decoration(
+                            null,
+                            null,
+                            TerminalBuffer.Style.FAINT,
+                            0
+                    )
+            );
 
             if (!scanner.hasNextLine()) break;
 
             String line = scanner.nextLine();
+            appendLine(
+                    line,
+                    new TerminalBuffer.Decoration(
+                            null,
+                            null,
+                            TerminalBuffer.Style.FAINT,
+                            0
+                    )
+            );
 
             try {
                 parseCommand(line);
