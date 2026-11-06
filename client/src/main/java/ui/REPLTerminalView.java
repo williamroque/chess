@@ -6,6 +6,7 @@ import model.AuthData;
 import model.UserData;
 
 import java.util.*;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 public class REPLTerminalView extends TerminalView {
@@ -16,7 +17,12 @@ public class REPLTerminalView extends TerminalView {
 
     AuthData currentAuth;
 
-    HashMap<String, Consumer<List<String>>> commands;
+    HashMap<String, CommandEntry> commands;
+
+    private record CommandEntry (
+            Consumer<List<String>> callback,
+            BooleanSupplier condition
+    ) {}
 
     private record REPLLine (
             String content,
@@ -71,8 +77,8 @@ public class REPLTerminalView extends TerminalView {
         initializeCommands();
     }
 
-    private void registerCommand(String command, Consumer<List<String>> callback) {
-        commands.put(command, callback);
+    private void registerCommand(String command, Consumer<List<String>> callback, BooleanSupplier condition) {
+        commands.put(command, new CommandEntry(callback, condition));
     }
 
     private void helpHandler(List<String> arguments) {
@@ -95,15 +101,30 @@ public class REPLTerminalView extends TerminalView {
                 0
         );
 
-         replLines.addAll(List.of(
-                 new REPLLine("♟  COMMANDS & USAGE", header),
-                 new REPLLine("────────────────────────────────────────────────────────────", divider),
-                 new REPLLine("▸ register <user> <pass> <email>   Create an account", body),
-                 new REPLLine("▸ login    <user> <pass>           Sign in to play", body),
-                 new REPLLine("▸ help                             Show available commands", body),
-                 new REPLLine("▸ quit                             Resign / exit the program", body),
-                 new REPLLine("────────────────────────────────────────────────────────────", divider)
-        ));
+        if (currentAuth == null)  {
+            replLines.addAll(List.of(
+                    new REPLLine("♟  COMMANDS & USAGE", header),
+                    new REPLLine("────────────────────────────────────────────────────────────", divider),
+                    new REPLLine("▸ register <user> <pass> <email>   Create an account", body),
+                    new REPLLine("▸ login    <user> <pass>           Sign in to play", body),
+                    new REPLLine("▸ help                             Show available commands", body),
+                    new REPLLine("▸ quit                             Resign / exit the program", body),
+                    new REPLLine("────────────────────────────────────────────────────────────", divider)
+            ));
+        } else {
+            replLines.addAll(List.of(
+                    new REPLLine("♟  COMMANDS & USAGE", header),
+                    new REPLLine("────────────────────────────────────────────────────────────", divider),
+                    new REPLLine("▸ create <name>                    Create a new game", body),
+                    new REPLLine("▸ list                             List games on the server", body),
+                    new REPLLine("▸ join <id> <WHITE|BLACK>          Join a game with a color by ID", body),
+                    new REPLLine("▸ observe <id>                     Observe a game in real time", body),
+                    new REPLLine("▸ logout                           Log out of your account", body),
+                    new REPLLine("▸ quit                             Resign / exit the program", body),
+                    new REPLLine("▸ help                             Show available commands", body),
+                    new REPLLine("────────────────────────────────────────────────────────────", divider)
+            ));
+        }
     }
 
     private void quitHandler(List<String> arguments) {
@@ -147,10 +168,10 @@ public class REPLTerminalView extends TerminalView {
     }
 
     private void initializeCommands() {
-        registerCommand("help", this::helpHandler);
-        registerCommand("quit", this::quitHandler);
-        registerCommand("register", this::registerHandler);
-        registerCommand("login", this::loginHandler);
+        registerCommand("help", this::helpHandler, () -> true);
+        registerCommand("quit", this::quitHandler, () -> currentAuth == null);
+        registerCommand("register", this::registerHandler, () -> currentAuth == null);
+        registerCommand("login", this::loginHandler, () -> currentAuth == null);
     }
 
     private void parseCommand(String command) throws InvalidCommandException {
@@ -159,9 +180,10 @@ public class REPLTerminalView extends TerminalView {
         List<String> commandParts = List.of(command.split(" "));
         String commandBase = commandParts.getFirst();
 
-        if (commands.containsKey(commandBase)) {
-            Consumer<List<String>> callback = commands.get(commandBase);
-            callback.accept(commandParts.subList(1, commandParts.size()));
+        CommandEntry entry = commands.get(commandBase);
+
+        if (entry != null && entry.condition().getAsBoolean()) {
+            entry.callback().accept(commandParts.subList(1, commandParts.size()));
         } else {
             throw new InvalidCommandException("Invalid command.");
         }
