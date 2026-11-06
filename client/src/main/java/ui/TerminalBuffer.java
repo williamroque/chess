@@ -54,7 +54,9 @@ public class TerminalBuffer {
     }
 
     public void writeToBuffer(int row, int col, String text, Decoration decoration) {
-        if (row < 0 || row >= height || col < 0 || col >= width) return;
+        if (row < 0 || row >= height || col < 0 || col >= width) {
+            return;
+        }
 
         int length = Math.min(text.length(), width - col);
         for (int j = 0; j < length; j++) {

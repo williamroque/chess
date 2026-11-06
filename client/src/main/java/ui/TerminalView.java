@@ -28,8 +28,12 @@ public class TerminalView {
 
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    if (line.contains("Columns:")) size[0] = Integer.parseInt(line.split(":")[1].trim());
-                    if (line.contains("Lines:"))   size[1] = Integer.parseInt(line.split(":")[1].trim());
+                    if (line.contains("Columns:")) {
+                        size[0] = Integer.parseInt(line.split(":")[1].trim());
+                    }
+                    if (line.contains("Lines:")) {
+                        size[1] = Integer.parseInt(line.split(":")[1].trim());
+                    }
                 }
             } else {
                 processBuilder = new ProcessBuilder("sh", "-c", "stty size < /dev/tty");

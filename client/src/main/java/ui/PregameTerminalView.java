@@ -211,59 +211,11 @@ public class PregameTerminalView extends REPLTerminalView {
         }
     }
 
-    private void joinHandler(List<String> arguments) {
-        if (arguments.size() != 2) {
-            showError("Wrong number of arguments for `join`.");
-            showError("▸ join <id> <WHITE/BLACK>");
-            return;
-        }
-
+    private void parseAndOpenGame(String rawGameID, String team) {
         int gameID = 0;
 
         try {
-            gameID = Integer.parseInt(arguments.getFirst());
-        } catch (NumberFormatException _) {
-            showError("Game ID should be a number.");
-            return;
-        }
-
-        try {
-            List<GameData> games = facade.listGames(authState.getAuth()).games().stream().toList();
-
-            if (gameID < 1 || gameID > games.size()) {
-                showError("Invalid game ID. Run `list` to see valid IDs.");
-                return;
-            }
-
-            GameData game = facade.joinGame(
-                    authState.getAuth(),
-                    arguments.getLast().toUpperCase(),
-                    games.get(gameID - 1).gameID()
-            );
-
-            gameState.setGame(game);
-            gameState.setTeam(
-                    arguments.getLast().equalsIgnoreCase("WHITE")
-                    ? ChessGame.TeamColor.WHITE
-                    : ChessGame.TeamColor.BLACK
-            );
-            manager.switchView("game");
-        } catch (FacadeException e) {
-            showError(e.getMessage());
-        }
-    }
-
-    private void observeHandler(List<String> arguments) {
-        if (arguments.size() != 1) {
-            showError("Wrong number of arguments for `observe`.");
-            showError("▸ observe <id>");
-            return;
-        }
-
-        int gameID = 0;
-
-        try {
-            gameID = Integer.parseInt(arguments.getFirst());
+            gameID = Integer.parseInt(rawGameID);
         } catch (NumberFormatException _) {
             showError("Game ID should be a number.");
             return;
@@ -279,12 +231,46 @@ public class PregameTerminalView extends REPLTerminalView {
 
             GameData game = games.get(gameID - 1);
 
+            if (team == null) {
+                gameState.clearTeam();
+            } else {
+                gameState.setTeam(
+                        team.equalsIgnoreCase("WHITE")
+                                ? ChessGame.TeamColor.WHITE
+                                : ChessGame.TeamColor.BLACK
+                );
+                facade.joinGame(
+                        authState.getAuth(),
+                        team.toUpperCase(),
+                        game.gameID()
+                );
+            }
+
             gameState.setGame(game);
-            gameState.clearTeam();
             manager.switchView("game");
         } catch (FacadeException e) {
             showError(e.getMessage());
         }
+    }
+
+    private void joinHandler(List<String> arguments) {
+        if (arguments.size() != 2) {
+            showError("Wrong number of arguments for `join`.");
+            showError("▸ join <id> <WHITE/BLACK>");
+            return;
+        }
+
+        parseAndOpenGame(arguments.getFirst(), arguments.getLast());
+    }
+
+    private void observeHandler(List<String> arguments) {
+        if (arguments.size() != 1) {
+            showError("Wrong number of arguments for `observe`.");
+            showError("▸ observe <id>");
+            return;
+        }
+
+        parseAndOpenGame(arguments.getFirst(), null);
     }
 
     private void logoutHandler(List<String> arguments) {

@@ -152,7 +152,9 @@ public class REPLTerminalView extends TerminalView {
             clearView();
             render();
 
-            if (!scanner.hasNextLine()) break;
+            if (!scanner.hasNextLine()) {
+                break;
+            }
 
             String line = scanner.nextLine();
             appendLine(
