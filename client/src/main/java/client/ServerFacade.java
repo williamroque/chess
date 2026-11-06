@@ -1,7 +1,6 @@
 package client;
 
 import client.exceptions.FacadeException;
-import client.exceptions.GenericHttpErrorException;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 public class TerminalView {
     protected ArrayList<TerminalViewRow> viewRows;
 
+    protected TerminalViewManager manager;
+
     protected int width;
     protected int height;
 
@@ -45,7 +47,9 @@ public class TerminalView {
         return size;
     }
 
-    public TerminalView() {
+    public TerminalView(TerminalViewManager manager) {
+        this.manager = manager;
+
         viewRows = new ArrayList<>();
 
         int[] terminalSize = getTerminalSize();
