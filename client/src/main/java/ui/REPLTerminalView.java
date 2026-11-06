@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import client.ServerFacade;
 import client.exceptions.FacadeException;
 import model.AuthData;
@@ -236,6 +237,40 @@ public class REPLTerminalView extends TerminalView {
         }
     }
 
+    private void joinHandler(List<String> arguments) {
+        if (arguments.size() != 2) {
+            showError("Wrong number of arguments for `join`.");
+            showError("▸ join <id> <WHITE/BLACK>");
+            return;
+        }
+
+        int gameID = 0;
+
+        try {
+            gameID = Integer.parseInt(arguments.getFirst());
+        } catch (NumberFormatException _) {
+            showError("Game ID should be a number.");
+            return;
+        }
+
+        try {
+            List<GameData> games = facade.listGames(currentAuth).games().stream().toList();
+
+            if (gameID < 1 || gameID > games.size()) {
+                showError("Invalid game ID. Run `list` to see valid IDs.");
+                return;
+            }
+
+            facade.joinGame(
+                    currentAuth,
+                    arguments.getLast().toUpperCase(),
+                    games.get(gameID - 1).gameID()
+            );
+        } catch (FacadeException e) {
+            showError(e.getMessage());
+        }
+    }
+
     private void initializeCommands() {
         registerCommand("help", this::helpHandler, () -> true);
         registerCommand("quit", this::quitHandler, () -> currentAuth == null);
@@ -245,7 +280,7 @@ public class REPLTerminalView extends TerminalView {
 
         registerCommand("create", this::createHandler, () -> currentAuth != null);
         registerCommand("list", this::listHandler, () -> currentAuth != null);
-//        registerCommand("join", this::joinHandler, () -> currentAuth != null);
+        registerCommand("join", this::joinHandler, () -> currentAuth != null);
 //        registerCommand("observe", this::observeHandler, () -> currentAuth != null);
 //        registerCommand("logout", this::logoutHanlder, () -> currentAuth != null);
     }
