@@ -4,8 +4,8 @@ import chess.ChessGame;
 import model.GameData;
 
 public class GameState {
-    GameData currentGame;
-    ChessGame.TeamColor currentTeam;
+    private GameData currentGame;
+    private ChessGame.TeamColor currentTeam;
 
     public GameState() {}
 

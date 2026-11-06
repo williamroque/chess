@@ -3,7 +3,7 @@ package ui;
 import model.AuthData;
 
 public class AuthState {
-    AuthData currentAuth;
+    private AuthData currentAuth;
 
     public AuthState() {}
 

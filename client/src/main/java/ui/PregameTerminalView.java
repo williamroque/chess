@@ -287,6 +287,22 @@ public class PregameTerminalView extends REPLTerminalView {
         }
     }
 
+    private void logoutHandler(List<String> arguments) {
+        if (!arguments.isEmpty()) {
+            showError("Wrong number of arguments for `logout`.");
+            showError("▸ logout");
+            return;
+        }
+
+        try {
+            facade.logout(authState.getAuth());
+            authState.clearAuth();
+            showSuccess("Logged out of your account.");
+        } catch (FacadeException e) {
+            showError(e.getMessage());
+        }
+    }
+
 
     @Override
     protected void initializeCommands() {
@@ -300,7 +316,7 @@ public class PregameTerminalView extends REPLTerminalView {
         registerCommand("list", this::listHandler, () -> authState.getAuth() != null);
         registerCommand("join", this::joinHandler, () -> authState.getAuth() != null);
         registerCommand("observe", this::observeHandler, () -> authState.getAuth() != null);
-//        registerCommand("logout", this::logoutHanlder, () -> authState.getAuth() != null);
+        registerCommand("logout", this::logoutHandler, () -> authState.getAuth() != null);
     }
 
     @Override
