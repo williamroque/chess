@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import client.ServerFacade;
 import client.exceptions.FacadeException;
 import model.GameData;
@@ -38,8 +39,8 @@ public class PregameTerminalView extends REPLTerminalView {
         ));
     }
 
-    public PregameTerminalView(TerminalViewManager manager, ServerFacade facade, AuthState authState) {
-        super(manager, facade, authState);
+    public PregameTerminalView(TerminalViewManager manager, ServerFacade facade, AuthState authState, GameState gameState) {
+        super(manager, facade, authState, gameState);
 
         TerminalViewRow welcomeRow = createRow(11);
         TerminalViewCell welcomeCell = createCell(welcomeRow, 0);
@@ -230,10 +231,17 @@ public class PregameTerminalView extends REPLTerminalView {
                 return;
             }
 
-            facade.joinGame(
+            GameData game = facade.joinGame(
                     authState.getAuth(),
                     arguments.getLast().toUpperCase(),
                     games.get(gameID - 1).gameID()
+            );
+
+            gameState.setGame(game);
+            gameState.setTeam(
+                    arguments.getLast().equalsIgnoreCase("WHITE")
+                    ? ChessGame.TeamColor.WHITE
+                    : ChessGame.TeamColor.BLACK
             );
             manager.switchView("game");
         } catch (FacadeException e) {

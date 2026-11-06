@@ -1,10 +1,7 @@
 package client;
 
 import chess.*;
-import ui.AuthState;
-import ui.PregameTerminalView;
-import ui.REPLTerminalView;
-import ui.TerminalViewManager;
+import ui.*;
 
 public class ClientMain {
     public static void main(String[] args) {
@@ -15,11 +12,12 @@ public class ClientMain {
         viewManager.initialize();
 
         AuthState authState = new AuthState();
+        GameState gameState = new GameState();
 
-        GameTerminalView gameView = new GameTerminalView(viewManager, facade, authState);
+        GameTerminalView gameView = new GameTerminalView(viewManager, facade, authState, gameState);
         viewManager.registerView("game", gameView);
 
-        REPLTerminalView replView = new PregameTerminalView(viewManager, facade, authState);
+        REPLTerminalView replView = new PregameTerminalView(viewManager, facade, authState, gameState);
         viewManager.registerView("pregame", replView);
         viewManager.switchView("pregame");
 

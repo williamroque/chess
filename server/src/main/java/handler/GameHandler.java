@@ -1,6 +1,7 @@
 package handler;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import dataaccess.exceptions.AlreadyTakenException;
 import dataaccess.exceptions.AuthTokenNotFoundException;
 import dataaccess.exceptions.GameNotFoundException;
@@ -102,13 +103,13 @@ public class GameHandler extends Handler {
         }
 
         try {
-            gameService.joinGame(
+            GameData updatedGame = gameService.joinGame(
                     authToken,
                     gameRequest.gameID(),
                     gameRequest.playerColor().equals("BLACK") ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE
             );
             ctx.status(200);
-            ctx.json("{}");
+            ctx.json(new Gson().toJson(updatedGame));
         } catch(GameNotFoundException _) {
             ctx.status(400);
             ctx.json("{ \"message\": \"Error: bad request\" }");

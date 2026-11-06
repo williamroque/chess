@@ -10,6 +10,7 @@ public class REPLTerminalView extends TerminalView {
     ServerFacade facade;
 
     protected AuthState authState;
+    protected GameState gameState;
 
     HashMap<String, CommandEntry> commands;
 
@@ -25,11 +26,12 @@ public class REPLTerminalView extends TerminalView {
 
     protected final ArrayList<REPLLine> replLines;
 
-    public REPLTerminalView(TerminalViewManager manager, ServerFacade facade, AuthState authState) {
+    public REPLTerminalView(TerminalViewManager manager, ServerFacade facade, AuthState authState, GameState gameState) {
         super(manager);
 
         this.facade = facade;
         this.authState = authState;
+        this.gameState = gameState;
 
         commands = new HashMap<>();
         replLines = new ArrayList<>();

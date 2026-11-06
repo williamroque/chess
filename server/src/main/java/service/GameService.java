@@ -40,7 +40,7 @@ public class GameService {
         return gameDAO.createGame(gameName, game);
     }
 
-    public void joinGame(String authToken, int gameID, ChessGame.TeamColor teamColor)
+    public GameData joinGame(String authToken, int gameID, ChessGame.TeamColor teamColor)
             throws DataAccessException {
 
         if (!userDAO.authExists(authToken)) {
@@ -67,5 +67,7 @@ public class GameService {
         );
 
         gameDAO.updateGame(updatedGame);
+
+        return updatedGame;
     }
 }

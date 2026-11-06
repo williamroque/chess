@@ -163,6 +163,15 @@ public class ChessBoard {
         }
     }
 
+    public ChessPiece[][] getBoardConfiguration() {
+        ChessPiece[][] deepClonedBoard = new ChessPiece[board.length][];
+        for (int i = 0; i < board.length; i++) {
+            deepClonedBoard[i] = board[i].clone();
+        }
+
+        return deepClonedBoard;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
