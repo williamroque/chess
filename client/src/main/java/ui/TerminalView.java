@@ -53,17 +53,17 @@ public class TerminalView {
         height = terminalSize[1];
     }
 
-    protected TerminalViewRow createRow(int relativeHeight) {
-        TerminalViewRow row = new TerminalViewRow(relativeHeight, new ArrayList<>());
+    protected TerminalViewRow createRow(int height) {
+        TerminalViewRow row = new TerminalViewRow(height, new ArrayList<>());
         this.viewRows.add(row);
 
         return row;
     }
 
-    protected TerminalViewCell createCell(TerminalViewRow row, int relativeWidth) {
+    protected TerminalViewCell createCell(TerminalViewRow row, int width) {
         TerminalBuffer buffer = new TerminalBuffer(0, 0, 0, 0);
 
-        TerminalViewCell cell = new TerminalViewCell(relativeWidth, buffer);
+        TerminalViewCell cell = new TerminalViewCell(width, buffer);
         row.row().add(cell);
 
         return cell;
@@ -81,23 +81,23 @@ public class TerminalView {
     }
 
     protected void resetLayout() {
-        double totalRowHeights = viewRows.stream()
-                .map(TerminalViewRow::relativeHeight)
+        int totalRowHeights = viewRows.stream()
+                .map(TerminalViewRow::height)
                 .reduce(0, Integer::sum);
 
         int rowOffset = 0;
 
         for (TerminalViewRow row : viewRows) {
-            int rowHeight = (int) (row.relativeHeight() / totalRowHeights * height);
+            int rowHeight = row.height() == 0 ? height - totalRowHeights : row.height();
 
-            double totalCellWidths = row.row().stream()
-                    .map(TerminalViewCell::relativeWidth)
+            int totalCellWidths = row.row().stream()
+                    .map(TerminalViewCell::width)
                     .reduce(0, Integer::sum);
 
             int cellOffset = 0;
 
             for (TerminalViewCell cell : row.row()) {
-                int cellWidth = (int) (cell.relativeWidth() / totalCellWidths * width);
+                int cellWidth = cell.width() == 0 ? width - totalCellWidths : cell.width();
 
                 cell.buffer().setAnchor(rowOffset, cellOffset);
                 cell.buffer().setSize(cellWidth, rowHeight);

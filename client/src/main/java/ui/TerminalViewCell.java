@@ -1,6 +1,6 @@
 package ui;
 
 public record TerminalViewCell(
-        int relativeWidth,
+        int width,
         TerminalBuffer buffer
 ) {}

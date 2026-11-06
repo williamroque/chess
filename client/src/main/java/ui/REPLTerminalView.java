@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 public class REPLTerminalView extends TerminalView {
     TerminalBuffer replBuffer;
+    TerminalBuffer welcomeBuffer;
 
     AuthData currentAuth;
 
@@ -17,22 +18,10 @@ public class REPLTerminalView extends TerminalView {
             TerminalBuffer.Decoration decoration
     ) {}
 
-    ArrayList<REPLLine> lines;
+    private final ArrayList<REPLLine> replLines;
+    private final ArrayList<REPLLine> welcomeLines = buildWelcome();
 
-    public REPLTerminalView() {
-        super();
-
-        TerminalViewRow row = createRow(100);
-        TerminalViewCell cell = createCell(row, 100);
-
-        resetLayout();
-
-        replBuffer = cell.buffer();
-        lines = new ArrayList<>();
-        commands = new HashMap<>();
-    }
-
-    private void printWelcome() {
+    private static ArrayList<REPLLine> buildWelcome() {
         TerminalBuffer.Decoration italic = new TerminalBuffer.Decoration(
                 null,
                 null,
@@ -40,7 +29,7 @@ public class REPLTerminalView extends TerminalView {
                 0
         );
 
-        lines.addAll(List.of(
+        return new ArrayList<>(List.of(
                 new REPLLine("┌──────────────────────────────────────────────┐", null),
                 new REPLLine("│  ♟   CS 240 CHESS — TERMINAL EDITION   ♙     │", null),
                 new REPLLine("├──────────────────────────────────────────────┤", null),
@@ -53,6 +42,24 @@ public class REPLTerminalView extends TerminalView {
                 new REPLLine("└──────────────────────────────────────────────┘", null),
                 new REPLLine("", null)
         ));
+    }
+
+    public REPLTerminalView() {
+        super();
+
+        TerminalViewRow welcomeRow = createRow(11);
+        TerminalViewCell welcomeCell = createCell(welcomeRow, 100);
+
+        TerminalViewRow replRow = createRow(0);
+        TerminalViewCell replCell = createCell(replRow, 0);
+
+        resetLayout();
+
+        welcomeBuffer = welcomeCell.buffer();
+        replBuffer = replCell.buffer();
+
+        replLines = new ArrayList<>();
+        commands = new HashMap<>();
     }
 
     private void registerCommand(String command, Consumer<List<String>> callback) {
@@ -72,11 +79,10 @@ public class REPLTerminalView extends TerminalView {
         }
     }
 
-    protected void renderLines() {
-        replBuffer.clearBuffer();
-        clearView();
+    private void renderLines(ArrayList<REPLLine> lines, TerminalBuffer buffer) {
+        buffer.clearBuffer();
 
-        int height = replBuffer.getSize()[1];
+        int height = buffer.getSize()[1];
         int limit = Math.min(lines.size(), height);
         List<REPLLine> visibleLines = lines.subList(lines.size() - limit, lines.size());
 
@@ -93,12 +99,12 @@ public class REPLTerminalView extends TerminalView {
 
                 content = content.replace("|", "");
             }
-            replBuffer.writeToBuffer(i, 0, content, line.decoration());
+            buffer.writeToBuffer(i, 0, content, line.decoration());
         }
 
-        replBuffer.render();
+        buffer.render();
 
-        int[] anchor = replBuffer.getAnchor();
+        int[] anchor = buffer.getAnchor();
         moveCursor(
                 anchor[0] + cursorPosition[0],
                 anchor[1] + cursorPosition[1]
@@ -106,23 +112,19 @@ public class REPLTerminalView extends TerminalView {
     }
 
     private void addLine(String content, TerminalBuffer.Decoration decoration) {
-        lines.add(new REPLLine(content, decoration));
-        renderLines();
+        replLines.add(new REPLLine(content, decoration));
     }
 
     private void appendLine(String content, TerminalBuffer.Decoration decoration) {
-        REPLLine lastLine = lines.removeLast();
-        lines.add(new REPLLine(
+        REPLLine lastLine = replLines.removeLast();
+        replLines.add(new REPLLine(
                 lastLine.content() + content,
                 decoration
         ));
-        renderLines();
     }
 
     @Override
     protected void eventLoop() {
-        printWelcome();
-
         Scanner scanner = new Scanner(System.in);
 
         while (mounted) {
@@ -135,6 +137,10 @@ public class REPLTerminalView extends TerminalView {
                             0
                     )
             );
+
+            clearView();
+            renderLines(welcomeLines, welcomeBuffer);
+            renderLines(replLines, replBuffer);
 
             if (!scanner.hasNextLine()) break;
 
@@ -152,7 +158,17 @@ public class REPLTerminalView extends TerminalView {
             try {
                 parseCommand(line);
             } catch (InvalidCommandException _) {
-
+                addLine(
+                        "Unknown command or invalid usage: `"
+                                + line.split(" ")[0]
+                                + "`. Type `help` to get a list of possible commands.",
+                        new TerminalBuffer.Decoration(
+                                null,
+                                TerminalBuffer.Color.MAGENTA,
+                                TerminalBuffer.Style.BOLD,
+                                0
+                        )
+                );
             }
         }
     }

@@ -3,6 +3,6 @@ package ui;
 import java.util.ArrayList;
 
 public record TerminalViewRow(
-        int relativeHeight,
+        int height,
         ArrayList<TerminalViewCell> row
 ) {}
