@@ -4,6 +4,7 @@ import client.ServerFacade;
 import client.exceptions.FacadeException;
 import model.AuthData;
 import model.GameData;
+import model.GameDataList;
 import model.UserData;
 
 import java.util.*;
@@ -185,6 +186,56 @@ public class REPLTerminalView extends TerminalView {
         }
     }
 
+    private void listHandler(List<String> arguments) {
+        if (!arguments.isEmpty()) {
+            showError("Wrong number of arguments for `list`.");
+            showError("▸ list");
+            return;
+        }
+
+        TerminalBuffer.Decoration header = new TerminalBuffer.Decoration(
+                null,
+                TerminalBuffer.Color.WHITE,
+                TerminalBuffer.Style.BOLD,
+                0
+        );
+        TerminalBuffer.Decoration body = new TerminalBuffer.Decoration(
+                null,
+                null,
+                null,
+                0
+        );
+
+        try {
+            GameDataList games = facade.listGames(currentAuth);
+            int lineWidth = 42;
+            int lineInnerWidth = lineWidth - 8;
+
+            addLine("╭── Game List ───────────────────────────╮", header);
+            addLine("│                                        │", header);
+
+            for (int i = 0; i < games.games().size(); i++) {
+                String gameName = games.games().stream().toList().get(i).gameName();
+                gameName = (i + 1) + ". " + gameName;
+
+                if (gameName.length() > lineInnerWidth) {
+                    gameName = gameName.substring(0, lineInnerWidth - 3) + "...";
+                }
+
+                gameName = String.format("%-" + lineInnerWidth + "s", gameName);
+
+                String content = "│   " + gameName + "   │";
+
+                addLine(content, body);
+            }
+
+            addLine("│                                        │", header);
+            addLine("╰────────────────────────────────────────╯", header);
+        } catch (FacadeException e) {
+            showError(e.getMessage());
+        }
+    }
+
     private void initializeCommands() {
         registerCommand("help", this::helpHandler, () -> true);
         registerCommand("quit", this::quitHandler, () -> currentAuth == null);
@@ -193,7 +244,7 @@ public class REPLTerminalView extends TerminalView {
         registerCommand("login", this::loginHandler, () -> currentAuth == null);
 
         registerCommand("create", this::createHandler, () -> currentAuth != null);
-//        registerCommand("list", this::listHandler, () -> currentAuth != null);
+        registerCommand("list", this::listHandler, () -> currentAuth != null);
 //        registerCommand("join", this::joinHandler, () -> currentAuth != null);
 //        registerCommand("observe", this::observeHandler, () -> currentAuth != null);
 //        registerCommand("logout", this::logoutHanlder, () -> currentAuth != null);
