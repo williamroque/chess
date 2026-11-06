@@ -3,6 +3,7 @@ package ui;
 import client.ServerFacade;
 import client.exceptions.FacadeException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 
 import java.util.*;
@@ -117,7 +118,7 @@ public class REPLTerminalView extends TerminalView {
                     new REPLLine("────────────────────────────────────────────────────────────", divider),
                     new REPLLine("▸ create <name>                    Create a new game", body),
                     new REPLLine("▸ list                             List games on the server", body),
-                    new REPLLine("▸ join <id> <WHITE|BLACK>          Join a game with a color by ID", body),
+                    new REPLLine("▸ join <id> <WHITE/BLACK>          Join a game with a color by ID", body),
                     new REPLLine("▸ observe <id>                     Observe a game in real time", body),
                     new REPLLine("▸ logout                           Log out of your account", body),
                     new REPLLine("▸ quit                             Resign / exit the program", body),
@@ -144,6 +145,7 @@ public class REPLTerminalView extends TerminalView {
                     arguments.get(1),
                     arguments.get(2)
             ));
+            showSuccess("Your new account has been created.");
         } catch (FacadeException e) {
             showError(e.getMessage());
         }
@@ -162,6 +164,22 @@ public class REPLTerminalView extends TerminalView {
                     arguments.get(1),
                     null
             ));
+            showSuccess("Logged in as " + arguments.get(0) + ".");
+        } catch (FacadeException e) {
+            showError(e.getMessage());
+        }
+    }
+
+    private void createHandler(List<String> arguments) {
+        if (arguments.size() != 1) {
+            showError("Wrong number of arguments for `create`.");
+            showError("▸ create <name>");
+            return;
+        }
+
+        try {
+            facade.createGame(currentAuth, arguments.getFirst());
+            showSuccess("Created a new game with the name of `" + arguments.getFirst() + "`.");
         } catch (FacadeException e) {
             showError(e.getMessage());
         }
@@ -170,8 +188,15 @@ public class REPLTerminalView extends TerminalView {
     private void initializeCommands() {
         registerCommand("help", this::helpHandler, () -> true);
         registerCommand("quit", this::quitHandler, () -> currentAuth == null);
+
         registerCommand("register", this::registerHandler, () -> currentAuth == null);
         registerCommand("login", this::loginHandler, () -> currentAuth == null);
+
+        registerCommand("create", this::createHandler, () -> currentAuth != null);
+//        registerCommand("list", this::listHandler, () -> currentAuth != null);
+//        registerCommand("join", this::joinHandler, () -> currentAuth != null);
+//        registerCommand("observe", this::observeHandler, () -> currentAuth != null);
+//        registerCommand("logout", this::logoutHanlder, () -> currentAuth != null);
     }
 
     private void parseCommand(String command) throws InvalidCommandException {
@@ -195,6 +220,18 @@ public class REPLTerminalView extends TerminalView {
                 new TerminalBuffer.Decoration(
                         null,
                         TerminalBuffer.Color.MAGENTA,
+                        TerminalBuffer.Style.BOLD,
+                        0
+                )
+        );
+    }
+
+    private void showSuccess(String message) {
+        addLine(
+                message,
+                new TerminalBuffer.Decoration(
+                        null,
+                        TerminalBuffer.Color.BLUE,
                         TerminalBuffer.Style.BOLD,
                         0
                 )
