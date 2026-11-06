@@ -58,7 +58,7 @@ public class PregameTerminalView extends REPLTerminalView {
         TerminalBuffer.Decoration header = new TerminalBuffer.Decoration(
                 null,
                 TerminalBuffer.Color.WHITE,
-                TerminalBuffer.Style.BOLD,
+                null,
                 0
         );
         TerminalBuffer.Decoration divider = new TerminalBuffer.Decoration(
@@ -76,16 +76,19 @@ public class PregameTerminalView extends REPLTerminalView {
 
         if (authState.getAuth() == null)  {
             replLines.addAll(List.of(
+                    new REPLLine("", body),
                     new REPLLine("♟  COMMANDS & USAGE", header),
                     new REPLLine("────────────────────────────────────────────────────────────", divider),
                     new REPLLine("▸ register <user> <pass> <email>   Create an account", body),
                     new REPLLine("▸ login    <user> <pass>           Sign in to play", body),
                     new REPLLine("▸ help                             Show available commands", body),
                     new REPLLine("▸ quit                             Resign / exit the program", body),
-                    new REPLLine("────────────────────────────────────────────────────────────", divider)
+                    new REPLLine("────────────────────────────────────────────────────────────", divider),
+                    new REPLLine(" ", body)
             ));
         } else {
             replLines.addAll(List.of(
+                    new REPLLine("", body),
                     new REPLLine("♟  COMMANDS & USAGE", header),
                     new REPLLine("────────────────────────────────────────────────────────────", divider),
                     new REPLLine("▸ create <name>                    Create a new game", body),
@@ -95,7 +98,8 @@ public class PregameTerminalView extends REPLTerminalView {
                     new REPLLine("▸ logout                           Log out of your account", body),
                     new REPLLine("▸ quit                             Resign / exit the program", body),
                     new REPLLine("▸ help                             Show available commands", body),
-                    new REPLLine("────────────────────────────────────────────────────────────", divider)
+                    new REPLLine("────────────────────────────────────────────────────────────", divider),
+                    new REPLLine(" ", body)
             ));
         }
     }
@@ -249,6 +253,41 @@ public class PregameTerminalView extends REPLTerminalView {
         }
     }
 
+    private void observeHandler(List<String> arguments) {
+        if (arguments.size() != 1) {
+            showError("Wrong number of arguments for `observe`.");
+            showError("▸ observe <id>");
+            return;
+        }
+
+        int gameID = 0;
+
+        try {
+            gameID = Integer.parseInt(arguments.getFirst());
+        } catch (NumberFormatException _) {
+            showError("Game ID should be a number.");
+            return;
+        }
+
+        try {
+            List<GameData> games = facade.listGames(authState.getAuth()).games().stream().toList();
+
+            if (gameID < 1 || gameID > games.size()) {
+                showError("Invalid game ID. Run `list` to see valid IDs.");
+                return;
+            }
+
+            GameData game = games.get(gameID - 1);
+
+            gameState.setGame(game);
+            gameState.clearTeam();
+            manager.switchView("game");
+        } catch (FacadeException e) {
+            showError(e.getMessage());
+        }
+    }
+
+
     @Override
     protected void initializeCommands() {
         registerCommand("help", this::helpHandler, () -> true);
@@ -260,7 +299,7 @@ public class PregameTerminalView extends REPLTerminalView {
         registerCommand("create", this::createHandler, () -> authState.getAuth() != null);
         registerCommand("list", this::listHandler, () -> authState.getAuth() != null);
         registerCommand("join", this::joinHandler, () -> authState.getAuth() != null);
-//        registerCommand("observe", this::observeHandler, () -> authState.getAuth() != null);
+        registerCommand("observe", this::observeHandler, () -> authState.getAuth() != null);
 //        registerCommand("logout", this::logoutHanlder, () -> authState.getAuth() != null);
     }
 

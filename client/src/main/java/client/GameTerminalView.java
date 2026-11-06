@@ -133,6 +133,8 @@ public class GameTerminalView extends REPLTerminalView {
     }
 
     private void quitHandler(List<String> arguments) {
+        gameState.clearTeam();
+        gameState.clearGame();
         unmount();
     }
 
