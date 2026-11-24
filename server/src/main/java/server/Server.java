@@ -7,6 +7,7 @@ import dataaccess.sql.SQLUserDAO;
 import handler.AppHandler;
 import handler.GameHandler;
 import handler.UserHandler;
+import handler.WebsocketHandler;
 import io.javalin.*;
 import io.javalin.json.JavalinGson;
 import service.AppService;
@@ -35,6 +36,9 @@ public class Server {
         AppHandler appHandler = new AppHandler(appService, userService);
         UserHandler userHandler = new UserHandler(userService);
         GameHandler gameHandler = new GameHandler(gameService, userService);
+        ConnectionManager manager = new ConnectionManager();
+
+        WebsocketHandler websocketHandler = new WebsocketHandler(gameService, userService, manager);
 
         javalin = Javalin.create(config -> {
                     config.staticFiles.add("web");
@@ -46,7 +50,13 @@ public class Server {
                 .delete("/session", userHandler::logout)
                 .get("/game", gameHandler::listGames)
                 .post("/game", gameHandler::createGame)
-                .put("/game", gameHandler::joinGame);
+                .put("/game", gameHandler::joinGame)
+                .ws("/ws", ws -> {
+                    ws.onConnect(websocketHandler::onConnect);
+                    ws.onClose(websocketHandler::onClose);
+                    ws.onMessage(websocketHandler::onMessage);
+                    ws.onError(websocketHandler::onError);
+                });
     }
 
     public int run(int desiredPort) {
