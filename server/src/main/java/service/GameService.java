@@ -70,4 +70,26 @@ public class GameService {
 
         return updatedGame;
     }
+
+    public boolean checkGame(String authToken, int gameID) throws DataAccessException {
+        if (!userDAO.authExists(authToken)) {
+            throw new AuthTokenNotFoundException("Auth token not found.");
+        }
+
+        return gameDAO.getGame(gameID) != null;
+    }
+
+    public GameData getGame(String authToken, int gameID) throws DataAccessException {
+        if (!userDAO.authExists(authToken)) {
+            throw new AuthTokenNotFoundException("Auth token not found.");
+        }
+
+        GameData game = gameDAO.getGame(gameID);
+
+        if (game == null) {
+            throw new GameNotFoundException("Game with provided gameID not found.");
+        }
+
+        return game;
+    }
 }
