@@ -1,6 +1,9 @@
-package ui;
+package ui.terminal;
 
-import client.ServerFacade;
+import client.communication.ServerFacade;
+import ui.state.AuthState;
+import ui.state.GameState;
+import ui.exceptions.InvalidCommandException;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;

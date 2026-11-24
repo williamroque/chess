@@ -1,5 +1,7 @@
 package client;
 
+import client.communication.HttpCommunicator;
+import client.communication.ServerFacade;
 import client.exceptions.FacadeException;
 import dataaccess.exceptions.DataAccessException;
 import dataaccess.sql.SQLAppDAO;

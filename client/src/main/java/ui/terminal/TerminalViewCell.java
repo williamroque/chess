@@ -1,4 +1,4 @@
-package ui;
+package ui.terminal;
 
 public record TerminalViewCell(
         int width,

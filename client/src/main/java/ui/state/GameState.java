@@ -1,4 +1,4 @@
-package ui;
+package ui.state;
 
 import chess.ChessGame;
 import model.GameData;

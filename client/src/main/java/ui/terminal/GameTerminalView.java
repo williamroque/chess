@@ -1,8 +1,10 @@
-package client;
+package ui.terminal;
 
 import chess.ChessGame;
 import chess.ChessPiece;
-import ui.*;
+import client.communication.ServerFacade;
+import ui.state.AuthState;
+import ui.state.GameState;
 
 import java.util.List;
 import java.util.Map;

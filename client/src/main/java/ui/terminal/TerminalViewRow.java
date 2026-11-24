@@ -1,4 +1,4 @@
-package ui;
+package ui.terminal;
 
 import java.util.ArrayList;
 

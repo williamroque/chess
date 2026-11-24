@@ -1,4 +1,6 @@
-package ui;
+package ui.terminal;
+
+import ui.util.EscapeSequences;
 
 import java.util.HashMap;
 

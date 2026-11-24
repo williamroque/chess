@@ -1,4 +1,6 @@
-package ui;
+package ui.terminal;
+
+import ui.util.EscapeSequences;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

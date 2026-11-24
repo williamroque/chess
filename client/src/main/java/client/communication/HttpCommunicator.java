@@ -1,4 +1,4 @@
-package client;
+package client.communication;
 
 import client.exceptions.FacadeException;
 import com.google.gson.Gson;

@@ -1,11 +1,13 @@
-package ui;
+package ui.terminal;
 
 import chess.ChessGame;
-import client.ServerFacade;
+import client.communication.ServerFacade;
 import client.exceptions.FacadeException;
 import model.GameData;
 import model.GameDataList;
 import model.UserData;
+import ui.state.AuthState;
+import ui.state.GameState;
 
 import java.util.ArrayList;
 import java.util.List;
