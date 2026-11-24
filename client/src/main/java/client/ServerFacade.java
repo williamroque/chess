@@ -14,71 +14,10 @@ import java.net.http.HttpResponse;
 import java.util.Map;
 
 public class ServerFacade {
-    private final HttpClient client = HttpClient.newHttpClient();
-    private final String baseURL;
-
-    private HttpRequest.BodyPublisher requestBodyPublisher(String body) {
-        if (body != null) {
-            return HttpRequest.BodyPublishers.ofString(body);
-        } else {
-            return HttpRequest.BodyPublishers.noBody();
-        }
-    }
-
-    private URI buildURI(String path) {
-        if (path.startsWith("/")) {
-            path = path.substring(1);
-        }
-
-        return URI.create(baseURL).resolve(path);
-    }
-
-    public void routeHttpError(int statusCode, Map<Integer, String> messages) throws FacadeException {
-        if (messages.containsKey(statusCode)) {
-            throw new FacadeException(messages.get(statusCode), statusCode);
-        }
-        throw new FacadeException("There was an issue communicating with the server.", statusCode);
-    }
-
-    private <T> T sendRequest(
-            String method,
-            String path,
-            String body,
-            String[] headers,
-            Class<T> clazz,
-            Map<Integer, String> errorMessages
-    ) throws FacadeException {
-        HttpRequest.Builder requestDraft = HttpRequest.newBuilder()
-                .uri(buildURI(path))
-                .method(method, requestBodyPublisher(body));
-
-        if (headers != null) {
-            requestDraft.headers(headers);
-        }
-
-        HttpRequest request = requestDraft.build();
-        HttpResponse<String> response;
-
-        try {
-            response = client.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString()
-            );
-        } catch (Exception e) {
-            throw new FacadeException("There was an issue connecting with the server.", 500);
-        }
-
-        int statusCode = response.statusCode();
-
-        if (statusCode < 200 || statusCode >= 300) {
-            routeHttpError(statusCode, errorMessages);
-        }
-
-        return clazz == null ? null : new Gson().fromJson(response.body(), clazz);
-    }
+    private final HttpCommunicator httpCommunicator;
 
     public void clear() throws FacadeException {
-        sendRequest(
+        httpCommunicator.sendRequest(
                 "DELETE",
                 "/db",
                 null,
@@ -91,7 +30,7 @@ public class ServerFacade {
     }
 
     public AuthData register(UserData data) throws FacadeException {
-        return sendRequest(
+        return httpCommunicator.sendRequest(
                 "POST",
                 "/user",
                 new Gson().toJson(data),
@@ -106,7 +45,7 @@ public class ServerFacade {
     }
 
     public AuthData login(UserData data) throws FacadeException {
-        return sendRequest(
+        return httpCommunicator.sendRequest(
                 "POST",
                 "/session",
                 new Gson().toJson(data),
@@ -125,7 +64,7 @@ public class ServerFacade {
                 "authorization", data.authToken()
         };
 
-        sendRequest(
+        httpCommunicator.sendRequest(
                 "DELETE",
                 "/session",
                 null,
@@ -143,7 +82,7 @@ public class ServerFacade {
                 "authorization", data.authToken()
         };
 
-        return sendRequest(
+        return httpCommunicator.sendRequest(
                 "GET",
                 "/game",
                 null,
@@ -161,7 +100,7 @@ public class ServerFacade {
                 "authorization", data.authToken()
         };
 
-        return sendRequest(
+        return httpCommunicator.sendRequest(
                 "POST",
                 "/game",
                 new Gson().toJson(Map.of(
@@ -182,7 +121,7 @@ public class ServerFacade {
                 "authorization", data.authToken()
         };
 
-        return sendRequest(
+        return httpCommunicator.sendRequest(
                 "PUT",
                 "/game",
                 new Gson().toJson(Map.of(
@@ -200,10 +139,7 @@ public class ServerFacade {
         );
     }
 
-    public ServerFacade(String baseURL) {
-        if (!baseURL.endsWith("/")) {
-            baseURL += "/";
-        }
-        this.baseURL = baseURL;
+    public ServerFacade(HttpCommunicator httpCommunicator) {
+        this.httpCommunicator = httpCommunicator;
     }
 }

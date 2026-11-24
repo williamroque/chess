@@ -6,7 +6,9 @@ import ui.*;
 public class ClientMain {
     public static void main(String[] args) {
         int port = 8080;
-        ServerFacade facade = new ServerFacade("http://localhost:" + port);
+
+        HttpCommunicator httpCommunicator = new HttpCommunicator("http://localhost:" + port);
+        ServerFacade facade = new ServerFacade(httpCommunicator);
 
         TerminalViewManager viewManager = new TerminalViewManager();
         viewManager.initialize();

@@ -42,7 +42,8 @@ public class ServerFacadeTests {
         gameService = new GameService(gameDAO, userDAO);
         appService = new AppService(appDAO);
 
-        facade = new ServerFacade("http://localhost:" + port);
+        HttpCommunicator httpCommunicator = new HttpCommunicator("http://localhost:" + port);
+        facade = new ServerFacade(httpCommunicator);
 
         System.out.println("Started test HTTP server on " + port);
     }
