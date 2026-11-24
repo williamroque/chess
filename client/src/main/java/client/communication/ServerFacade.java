@@ -11,6 +11,7 @@ import java.util.Map;
 
 public class ServerFacade {
     private final HttpCommunicator httpCommunicator;
+    private final WebsocketCommunicator websocketCommunicator;
 
     public void clear() throws FacadeException {
         httpCommunicator.sendRequest(
@@ -135,7 +136,8 @@ public class ServerFacade {
         );
     }
 
-    public ServerFacade(HttpCommunicator httpCommunicator) {
+    public ServerFacade(HttpCommunicator httpCommunicator, WebsocketCommunicator websocketCommunicator) {
         this.httpCommunicator = httpCommunicator;
+        this.websocketCommunicator = websocketCommunicator;
     }
 }

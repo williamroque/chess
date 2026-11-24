@@ -2,19 +2,30 @@ package client;
 
 import client.communication.HttpCommunicator;
 import client.communication.ServerFacade;
+import client.communication.WebsocketCommunicator;
+import jakarta.websocket.DeploymentException;
 import ui.state.AuthState;
 import ui.state.GameState;
 import ui.terminal.GameTerminalView;
 import ui.terminal.PregameTerminalView;
 import ui.terminal.REPLTerminalView;
 import ui.terminal.TerminalViewManager;
+import websocket.messages.ServerMessage;
 
-public class ChessClient {
-    void start() {
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+public class ChessClient implements ServerMessageObserver {
+    void start() throws DeploymentException, URISyntaxException, IOException {
         int port = 8080;
 
         HttpCommunicator httpCommunicator = new HttpCommunicator("http://localhost:" + port);
-        ServerFacade facade = new ServerFacade(httpCommunicator);
+        WebsocketCommunicator websocketCommunicator = new WebsocketCommunicator(
+                "ws://localhost:" + port + "/ws",
+                this
+        );
+
+        ServerFacade facade = new ServerFacade(httpCommunicator, websocketCommunicator);
 
         TerminalViewManager viewManager = new TerminalViewManager();
         viewManager.initialize();
@@ -30,5 +41,9 @@ public class ChessClient {
         viewManager.switchView("pregame");
 
         viewManager.exit();
+    }
+
+    public void notify(ServerMessage message) {
+
     }
 }

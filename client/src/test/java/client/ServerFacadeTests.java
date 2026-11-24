@@ -2,11 +2,13 @@ package client;
 
 import client.communication.HttpCommunicator;
 import client.communication.ServerFacade;
+import client.communication.WebsocketCommunicator;
 import client.exceptions.FacadeException;
 import dataaccess.exceptions.DataAccessException;
 import dataaccess.sql.SQLAppDAO;
 import dataaccess.sql.SQLGameDAO;
 import dataaccess.sql.SQLUserDAO;
+import jakarta.websocket.DeploymentException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -16,6 +18,9 @@ import service.AppService;
 import service.GameService;
 import service.UserService;
 import service.results.LoginResult;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 
 public class ServerFacadeTests {
@@ -32,7 +37,7 @@ public class ServerFacadeTests {
     private static AppService appService;
 
     @BeforeAll
-    public static void init() {
+    public static void init() throws DeploymentException, URISyntaxException, IOException {
         server = new Server();
         var port = server.run(0);
 
@@ -45,7 +50,12 @@ public class ServerFacadeTests {
         appService = new AppService(appDAO);
 
         HttpCommunicator httpCommunicator = new HttpCommunicator("http://localhost:" + port);
-        facade = new ServerFacade(httpCommunicator);
+        WebsocketCommunicator websocketCommunicator = new WebsocketCommunicator(
+                "ws://localhost:" + port + "/ws",
+                new ChessClient()
+        );
+
+        facade = new ServerFacade(httpCommunicator, websocketCommunicator);
 
         System.out.println("Started test HTTP server on " + port);
     }
