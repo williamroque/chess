@@ -92,4 +92,12 @@ public class GameService {
 
         return game;
     }
+
+    public void updateGame(String authToken, GameData game) throws DataAccessException {
+        if (!userDAO.authExists(authToken)) {
+            throw new AuthTokenNotFoundException("Auth token not found.");
+        }
+
+        gameDAO.updateGame(game);
+    }
 }

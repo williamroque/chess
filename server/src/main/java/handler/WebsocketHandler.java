@@ -1,6 +1,9 @@
 package handler;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.exceptions.DataAccessException;
 import dataaccess.exceptions.InvalidCredentialsException;
@@ -24,7 +27,8 @@ public class WebsocketHandler extends Handler {
     private final ConnectionManager manager;
 
     Map<UserGameCommand.CommandType, BiConsumer<UserGameCommand, WsContext>> COMMANDS = Map.of(
-            UserGameCommand.CommandType.CONNECT, this::connect
+            UserGameCommand.CommandType.CONNECT, this::connect,
+            UserGameCommand.CommandType.MAKE_MOVE, this::makeMove
     );
 
     public WebsocketHandler(GameService gameService, UserService userService, ConnectionManager manager) {
@@ -71,6 +75,66 @@ public class WebsocketHandler extends Handler {
             ), authToken);
         } catch (DataAccessException e) {
             connection.send(new ErrorMessage("Error: Invalid credentials or game ID"));
+        }
+    }
+
+    private void makeMove(UserGameCommand command, WsContext ctx) {
+        String authToken = command.getAuthToken();
+        int gameID = command.getGameID();
+
+        Connection connection = new Connection(
+                authToken,
+                ctx,
+                gameID
+        );
+
+        try {
+            if (!gameService.checkGame(authToken, gameID)) {
+                throw new InvalidCredentialsException("");
+            }
+
+            String currentUsername = userService.getUsernameByToken(authToken);
+
+            GameData data = gameService.getGame(authToken, gameID);
+
+            ChessGame.TeamColor userColor = null;
+
+            if (data.blackUsername().equals(currentUsername)) {
+                userColor = ChessGame.TeamColor.BLACK;
+            } else if (data.whiteUsername().equals(currentUsername)) {
+                userColor = ChessGame.TeamColor.WHITE;
+            }
+
+            ChessGame game = data.game();
+            ChessMove move = command.getMove();
+
+            ChessPiece startPiece = game.getBoard().getPiece(move.getStartPosition());
+
+            if (startPiece != null && startPiece.getTeamColor() != userColor) {
+                throw new InvalidMoveException("");
+            }
+
+            game.makeMove(command.getMove());
+            gameService.updateGame(authToken, data);
+
+            manager.broadcast(gameID, new LoadGameMessage(data), null);
+            manager.broadcast(gameID, new NotificationMessage(
+                    currentUsername + " just moved"
+            ), authToken);
+
+            if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                manager.broadcast(gameID, new NotificationMessage(
+                        "The game has ended in checkmate. Black wins!"
+                ), null);
+            } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                manager.broadcast(gameID, new NotificationMessage(
+                        "The game has ended in checkmate. White wins!"
+                ), null);
+            }
+        } catch (DataAccessException e) {
+            connection.send(new ErrorMessage("Error: Invalid credentials or game ID"));
+        } catch (InvalidMoveException e) {
+            connection.send(new ErrorMessage("Error: Invalid chess move"));
         }
     }
 

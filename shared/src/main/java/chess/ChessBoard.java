@@ -74,7 +74,7 @@ public class ChessBoard {
         board = new ChessPiece[BOARD_HEIGHT][BOARD_WIDTH];
     }
 
-    private ChessPosition algebraicToMatrix(String notation) {
+    public static ChessPosition algebraicToMatrix(String notation) {
         String files = "abcdefgh";
 
         int row = parseInt(String.valueOf(notation.charAt(1)));
