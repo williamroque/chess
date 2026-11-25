@@ -311,7 +311,7 @@ public class PregameTerminalView extends REPLTerminalView {
     @Override
     protected void initializeCommands() {
         registerCommand("help", this::helpHandler, () -> true);
-        registerCommand("quit", this::quitHandler, () -> authState.getAuth() == null);
+        registerCommand("quit", this::quitHandler, () -> true);
 
         registerCommand("register", this::registerHandler, () -> authState.getAuth() == null);
         registerCommand("login", this::loginHandler, () -> authState.getAuth() == null);

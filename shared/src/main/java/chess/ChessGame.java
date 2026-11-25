@@ -95,16 +95,25 @@ public class ChessGame {
     }
 
     private boolean wasEnPassant(ChessMove move) {
-        ChessPiece piece = board.getPiece(move.getEndPosition());
+        ChessPiece movingPiece = board.getPiece(move.getStartPosition());
+        ChessPiece targetPiece = board.getPiece(move.getEndPosition());
 
-        if (piece != null && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-            int startColumn = move.getStartPosition().getColumn();
-            int endColumn = move.getEndPosition().getColumn();
-
-            return startColumn != endColumn;
+        if (movingPiece == null || movingPiece.getPieceType() != ChessPiece.PieceType.PAWN) {
+            return false;
+        }
+        if (!currentFlags.contains(GameFlags.DOUBLE_FORWARD) || enPassantCandidate == null) {
+            return false;
         }
 
-        return false;
+        ChessPiece capturedPiece = board.getPiece(enPassantCandidate);
+        int direction = movingPiece.getTeamColor() == TeamColor.WHITE ? 1 : -1;
+
+        return targetPiece == null
+                && capturedPiece != null
+                && capturedPiece.getTeamColor() != movingPiece.getTeamColor()
+                && move.getStartPosition().getRow() == enPassantCandidate.getRow()
+                && move.getEndPosition().getRow() == move.getStartPosition().getRow() + direction
+                && move.getEndPosition().getColumn() == enPassantCandidate.getColumn();
     }
 
     private ArrayList<ChessMove> getCastlingMoves(ChessPiece piece, ChessPosition position) {
@@ -246,9 +255,10 @@ public class ChessGame {
 
                 if (moveDistance == 2) {
                     currentFlags.add(GameFlags.DOUBLE_FORWARD);
+                    enPassantCandidate = move.getEndPosition();
+                } else {
+                    enPassantCandidate = null;
                 }
-
-                enPassantCandidate = move.getEndPosition();
 
                 break;
             case KING:
@@ -296,11 +306,11 @@ public class ChessGame {
         );
 
         if (moveChecks) {
-            board.movePiece(move);
-
             if (wasEnPassant(move)) {
                 board.removePiece(enPassantCandidate);
             }
+
+            board.movePiece(move);
 
             if (wasCastling(move)) {
                 ChessMove rookMove = getRookCastlingMove(move);

@@ -235,7 +235,7 @@ public class GameTerminalView extends REPLTerminalView {
 
         try {
             facade.makeMove(authState.getAuth().authToken(), gameState.getGame().gameID(), move);
-        } catch (IOException e) {
+        } catch (Exception e) {
             showError("Connection error.");
         }
     }
@@ -249,7 +249,7 @@ public class GameTerminalView extends REPLTerminalView {
 
         try {
             facade.leave(authState.getAuth().authToken(), gameState.getGame().gameID());
-        } catch (IOException e) {
+        } catch (Exception e) {
             showError("Connection error.");
         }
 
