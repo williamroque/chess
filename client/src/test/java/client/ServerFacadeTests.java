@@ -328,7 +328,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void joinGameSuccessfullyTest() throws DataAccessException, FacadeException {
+    public void joinGameSuccessfullyTest() throws DataAccessException, FacadeException, DeploymentException, IOException {
         UserData dummyUser = new UserData(
                 "jenny",
                 "jennythegirl",
@@ -376,7 +376,7 @@ public class ServerFacadeTests {
                     "WHITE",
                     1000
             );
-        } catch (FacadeException e) {
+        } catch (FacadeException | DeploymentException | IOException e) {
             thrownCode = e.statusCode;
             System.out.println(e.getMessage());
         }
@@ -394,6 +394,10 @@ public class ServerFacadeTests {
         } catch (FacadeException e) {
             thrownCode = e.statusCode;
             System.out.println(e.getMessage());
+        } catch (DeploymentException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         Assertions.assertEquals(400, thrownCode);
@@ -409,7 +413,7 @@ public class ServerFacadeTests {
                     "WHITE",
                     123
             );
-        } catch (FacadeException e) {
+        } catch (FacadeException | DeploymentException | IOException e) {
             thrownCode = e.statusCode;
             System.out.println(e.getMessage());
         }
@@ -418,7 +422,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void joinGameAlreadyTakenTest() throws DataAccessException, FacadeException {
+    public void joinGameAlreadyTakenTest() throws DataAccessException, FacadeException, DeploymentException, IOException {
         UserData dummyUser = new UserData(
                 "jenny",
                 "jennythegirl",

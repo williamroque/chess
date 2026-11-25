@@ -6,16 +6,18 @@ import client.communication.WebsocketCommunicator;
 import jakarta.websocket.DeploymentException;
 import ui.state.AuthState;
 import ui.state.GameState;
-import ui.terminal.GameTerminalView;
-import ui.terminal.PregameTerminalView;
-import ui.terminal.REPLTerminalView;
-import ui.terminal.TerminalViewManager;
+import ui.terminal.*;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class ChessClient implements ServerMessageObserver {
+    private GameTerminalView gameView;
+
     void start() throws DeploymentException, URISyntaxException, IOException {
         int port = 8080;
 
@@ -33,7 +35,7 @@ public class ChessClient implements ServerMessageObserver {
         AuthState authState = new AuthState();
         GameState gameState = new GameState();
 
-        GameTerminalView gameView = new GameTerminalView(viewManager, facade, authState, gameState);
+        gameView = new GameTerminalView(viewManager, facade, authState, gameState);
         viewManager.registerView("game", gameView);
 
         REPLTerminalView replView = new PregameTerminalView(viewManager, facade, authState, gameState);
@@ -44,6 +46,21 @@ public class ChessClient implements ServerMessageObserver {
     }
 
     public void notify(ServerMessage message) {
-
+        switch (message.getServerMessageType()) {
+            case LOAD_GAME -> {
+                LoadGameMessage loadGameMessage = (LoadGameMessage) message;
+                gameView.loadGame(loadGameMessage.getGame());
+            }
+            case ERROR -> {
+                ErrorMessage errorMessage = (ErrorMessage) message;
+                gameView.showError(errorMessage.getErrorMessage());
+                gameView.refreshREPL();
+            }
+            case NOTIFICATION -> {
+                NotificationMessage notificationMessage = (NotificationMessage) message;
+                gameView.showNeutral(notificationMessage.getMessage());
+                gameView.refreshREPL();
+            }
+        }
     }
 }

@@ -3,6 +3,7 @@ package ui.terminal;
 import chess.ChessGame;
 import chess.ChessPiece;
 import client.communication.ServerFacade;
+import model.GameData;
 import ui.state.AuthState;
 import ui.state.GameState;
 
@@ -163,6 +164,46 @@ public class GameTerminalView extends REPLTerminalView {
         boardBuffer.render();
     }
 
+    public void loadGame(GameData data) {
+        gameState.setGame(data);
+        render();
+    }
+
+    private void helpHandler(List<String> arguments) {
+        TerminalBuffer.Decoration header = new TerminalBuffer.Decoration(
+                null,
+                TerminalBuffer.Color.WHITE,
+                null,
+                0
+        );
+        TerminalBuffer.Decoration divider = new TerminalBuffer.Decoration(
+                null,
+                TerminalBuffer.Color.DARK_GREY,
+                TerminalBuffer.Style.FAINT,
+                0
+        );
+        TerminalBuffer.Decoration body = new TerminalBuffer.Decoration(
+                null,
+                TerminalBuffer.Color.BLUE,
+                null,
+                0
+        );
+
+        replLines.addAll(List.of(
+                new REPLLine("", body),
+                new REPLLine("♟  COMMANDS & USAGE", header),
+                new REPLLine("────────────────────────────────────────────────────────────", divider),
+                new REPLLine("▸ move     <start> <end>           Move a piece using algebraic notation", body),
+                new REPLLine("▸ legal    <position>              Highlight all legal moves for a piece", body),
+                new REPLLine("▸ redraw                           Refresh the chess board", body),
+                new REPLLine("▸ leave                            Leave the game without resigning", body),
+                new REPLLine("▸ resign                           Resign the game", body),
+                new REPLLine("▸ help                             Show available commands", body),
+                new REPLLine("────────────────────────────────────────────────────────────", divider),
+                new REPLLine(" ", body)
+        ));
+    }
+
     private void quitHandler(List<String> arguments) {
         gameState.clearTeam();
         gameState.clearGame();
@@ -171,12 +212,17 @@ public class GameTerminalView extends REPLTerminalView {
 
     @Override
     protected void initializeCommands() {
+        registerCommand("help", this::helpHandler, () -> true);
         registerCommand("quit", this::quitHandler, () -> true);
     }
 
     @Override
     protected void render() {
         renderBoard();
+        renderLines(replLines, replBuffer);
+    }
+
+    public void refreshREPL() {
         renderLines(replLines, replBuffer);
     }
 }

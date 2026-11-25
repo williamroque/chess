@@ -3,12 +3,14 @@ package ui.terminal;
 import chess.ChessGame;
 import client.communication.ServerFacade;
 import client.exceptions.FacadeException;
+import jakarta.websocket.DeploymentException;
 import model.GameData;
 import model.GameDataList;
 import model.UserData;
 import ui.state.AuthState;
 import ui.state.GameState;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -258,10 +260,14 @@ public class PregameTerminalView extends REPLTerminalView {
                 );
             }
 
+            facade.connectWS(authState.getAuth().authToken(), game.gameID());
+
             gameState.setGame(game);
             manager.switchView("game");
         } catch (FacadeException e) {
             showError(e.getMessage());
+        } catch (DeploymentException | IOException e) {
+            showError("Error: Failed to connect");
         }
     }
 

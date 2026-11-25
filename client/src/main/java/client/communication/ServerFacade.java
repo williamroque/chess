@@ -2,11 +2,14 @@ package client.communication;
 
 import client.exceptions.FacadeException;
 import com.google.gson.Gson;
+import jakarta.websocket.DeploymentException;
 import model.AuthData;
 import model.GameData;
 import model.GameDataList;
 import model.UserData;
+import websocket.commands.UserGameCommand;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class ServerFacade {
@@ -118,7 +121,7 @@ public class ServerFacade {
                 "authorization", data.authToken()
         };
 
-        return httpCommunicator.sendRequest(
+        GameData game = httpCommunicator.sendRequest(
                 "PUT",
                 "/game",
                 new Gson().toJson(Map.of(
@@ -134,6 +137,17 @@ public class ServerFacade {
                         500, "There was an internal server error while trying to get game list."
                 )
         );
+
+        return game;
+    }
+
+    public void connectWS(String authToken, int gameID) throws DeploymentException, IOException {
+        websocketCommunicator.connect();
+        websocketCommunicator.send(new UserGameCommand(
+                UserGameCommand.CommandType.CONNECT,
+                authToken,
+                gameID,
+                null));
     }
 
     public ServerFacade(HttpCommunicator httpCommunicator, WebsocketCommunicator websocketCommunicator) {

@@ -1,6 +1,5 @@
 package server;
 
-import com.google.gson.Gson;
 import io.javalin.websocket.WsContext;
 import websocket.messages.ServerMessage;
 

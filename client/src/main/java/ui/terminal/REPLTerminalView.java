@@ -63,7 +63,7 @@ public class REPLTerminalView extends TerminalView {
         }
     }
 
-    protected void showError(String message) {
+    public void showError(String message) {
         addLine(
                 message,
                 new TerminalBuffer.Decoration(
@@ -75,13 +75,25 @@ public class REPLTerminalView extends TerminalView {
         );
     }
 
-    protected void showSuccess(String message) {
+    public void showSuccess(String message) {
         addLine(
                 message,
                 new TerminalBuffer.Decoration(
                         null,
                         TerminalBuffer.Color.BLUE,
                         TerminalBuffer.Style.BOLD,
+                        0
+                )
+        );
+    }
+
+    public void showNeutral(String message) {
+        addLine(
+                message,
+                new TerminalBuffer.Decoration(
+                        null,
+                        null,
+                        null,
                         0
                 )
         );
