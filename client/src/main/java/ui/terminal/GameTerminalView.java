@@ -274,11 +274,23 @@ public class GameTerminalView extends REPLTerminalView {
         }
     }
 
+    private void redrawHandler(List<String> arguments) {
+        if (!arguments.isEmpty()) {
+            showError("Wrong number of arguments for `redraw`.");
+            showError("▸ redraw");
+            return;
+        }
+
+        renderBoard();
+    }
+
+
     @Override
     protected void initializeCommands() {
         registerCommand("help", this::helpHandler, () -> true);
         registerCommand("leave", this::leaveHandler, () -> true);
         registerCommand("resign", this::resignHandler, () -> true);
+        registerCommand("redraw", this::redrawHandler, () -> true);
         registerCommand("move", this::moveHandler, () -> true);
     }
 
