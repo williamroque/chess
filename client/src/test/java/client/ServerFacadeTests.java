@@ -8,7 +8,6 @@ import dataaccess.exceptions.DataAccessException;
 import dataaccess.sql.SQLAppDAO;
 import dataaccess.sql.SQLGameDAO;
 import dataaccess.sql.SQLUserDAO;
-import jakarta.websocket.DeploymentException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -37,7 +36,7 @@ public class ServerFacadeTests {
     private static AppService appService;
 
     @BeforeAll
-    public static void init() throws DeploymentException, URISyntaxException, IOException {
+    public static void init() throws URISyntaxException {
         server = new Server();
         var port = server.run(0);
 
@@ -328,7 +327,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void joinGameSuccessfullyTest() throws DataAccessException, FacadeException, DeploymentException, IOException {
+    public void joinGameSuccessfullyTest() throws DataAccessException, FacadeException {
         UserData dummyUser = new UserData(
                 "jenny",
                 "jennythegirl",
@@ -376,7 +375,7 @@ public class ServerFacadeTests {
                     "WHITE",
                     1000
             );
-        } catch (FacadeException | DeploymentException | IOException e) {
+        } catch (FacadeException e) {
             thrownCode = e.statusCode;
             System.out.println(e.getMessage());
         }
@@ -394,10 +393,6 @@ public class ServerFacadeTests {
         } catch (FacadeException e) {
             thrownCode = e.statusCode;
             System.out.println(e.getMessage());
-        } catch (DeploymentException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
 
         Assertions.assertEquals(400, thrownCode);
@@ -413,7 +408,7 @@ public class ServerFacadeTests {
                     "WHITE",
                     123
             );
-        } catch (FacadeException | DeploymentException | IOException e) {
+        } catch (FacadeException e) {
             thrownCode = e.statusCode;
             System.out.println(e.getMessage());
         }
@@ -422,7 +417,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void joinGameAlreadyTakenTest() throws DataAccessException, FacadeException, DeploymentException, IOException {
+    public void joinGameAlreadyTakenTest() throws DataAccessException, FacadeException {
         UserData dummyUser = new UserData(
                 "jenny",
                 "jennythegirl",
