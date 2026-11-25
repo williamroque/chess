@@ -294,7 +294,7 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         if (isGameOver()) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("Error: Game has already ended");
         }
 
         ChessPiece piece = board.getPiece(move.getStartPosition());
@@ -326,7 +326,7 @@ public class ChessGame {
 
             setFlags(piece, move);
         } else {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("Error: Invalid chess move");
         }
 
         teamTurn = teamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;

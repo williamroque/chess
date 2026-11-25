@@ -87,7 +87,7 @@ public class WebsocketHandler extends Handler {
 
         try {
             if (!gameService.checkGame(authToken, gameID)) {
-                throw new InvalidCredentialsException("");
+                throw new InvalidCredentialsException("Error: Invalid credentials or game ID");
             }
 
             String currentUsername = userService.getUsernameByToken(authToken);
@@ -102,13 +102,17 @@ public class WebsocketHandler extends Handler {
                 userColor = ChessGame.TeamColor.WHITE;
             }
 
+            if (userColor == null) {
+                throw new InvalidMoveException("Error: Observers can't make moves");
+            }
+
             ChessGame game = data.game();
             ChessMove move = command.getMove();
 
             ChessPiece startPiece = game.getBoard().getPiece(move.getStartPosition());
 
             if (startPiece != null && startPiece.getTeamColor() != userColor) {
-                throw new InvalidMoveException("");
+                throw new InvalidMoveException("Error: You don't have a piece at that position");
             }
 
             game.makeMove(command.getMove());
@@ -137,10 +141,8 @@ public class WebsocketHandler extends Handler {
                     ), null);
                     break;
             }
-        } catch (DataAccessException e) {
-            connection.send(new ErrorMessage("Error: Invalid credentials or game ID"));
-        } catch (InvalidMoveException e) {
-            connection.send(new ErrorMessage("Error: Invalid chess move"));
+        } catch (DataAccessException | InvalidMoveException e) {
+            connection.send(new ErrorMessage(e.getMessage()));
         }
     }
 

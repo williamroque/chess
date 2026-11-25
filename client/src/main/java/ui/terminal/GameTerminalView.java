@@ -260,10 +260,25 @@ public class GameTerminalView extends REPLTerminalView {
         unmount();
     }
 
+    private void resignHandler(List<String> arguments) {
+        if (!arguments.isEmpty()) {
+            showError("Wrong number of arguments for `resign`.");
+            showError("▸ resign");
+            return;
+        }
+
+        try {
+            facade.resign(authState.getAuth().authToken(), gameState.getGame().gameID());
+        } catch (Exception e) {
+            showError("Connection error.");
+        }
+    }
+
     @Override
     protected void initializeCommands() {
         registerCommand("help", this::helpHandler, () -> true);
         registerCommand("leave", this::leaveHandler, () -> true);
+        registerCommand("resign", this::resignHandler, () -> true);
         registerCommand("move", this::moveHandler, () -> true);
     }
 
