@@ -164,37 +164,13 @@ public class GameTerminalView extends REPLTerminalView {
     }
 
     private void helpHandler(List<String> arguments) {
-        TerminalBuffer.Decoration header = new TerminalBuffer.Decoration(
-                null,
-                TerminalBuffer.Color.WHITE,
-                null,
-                0
-        );
-        TerminalBuffer.Decoration divider = new TerminalBuffer.Decoration(
-                null,
-                TerminalBuffer.Color.DARK_GREY,
-                TerminalBuffer.Style.FAINT,
-                0
-        );
-        TerminalBuffer.Decoration body = new TerminalBuffer.Decoration(
-                null,
-                TerminalBuffer.Color.BLUE,
-                null,
-                0
-        );
-
-        replLines.addAll(List.of(
-                new REPLLine("", body),
-                new REPLLine("♟  COMMANDS & USAGE", header),
-                new REPLLine("────────────────────────────────────────────────────────────", divider),
-                new REPLLine("▸ move     <move>                  Move a piece using algebraic notation", body),
-                new REPLLine("▸ legal    <position>              Highlight all legal moves for a piece", body),
-                new REPLLine("▸ redraw                           Refresh the chess board", body),
-                new REPLLine("▸ leave                            Leave the game without resigning", body),
-                new REPLLine("▸ resign                           Resign the game", body),
-                new REPLLine("▸ help                             Show available commands", body),
-                new REPLLine("────────────────────────────────────────────────────────────", divider),
-                new REPLLine(" ", body)
+        addHelpTable(List.of(
+                new HelpTableRow("move",   List.of("<move>"),       "Move a piece using algebraic notation"),
+                new HelpTableRow("legal",  List.of("<position>"),   "Highlight all legal moves for a piece"),
+                new HelpTableRow("redraw", List.of(),                   "Refresh the chess board"),
+                new HelpTableRow("leave",  List.of(),                   "Leave the game without resigning"),
+                new HelpTableRow("resign", List.of(),                   "Resign the game"),
+                new HelpTableRow("help",   List.of(),                   "Show available commands")
         ));
     }
 

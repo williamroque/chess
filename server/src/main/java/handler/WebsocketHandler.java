@@ -26,7 +26,7 @@ public class WebsocketHandler extends Handler {
     private final GameService gameService;
     private final ConnectionManager manager;
 
-    Map<UserGameCommand.CommandType, BiConsumer<UserGameCommand, WsContext>> COMMANDS = Map.of(
+    Map<UserGameCommand.CommandType, BiConsumer<UserGameCommand, WsContext>> commands = Map.of(
             UserGameCommand.CommandType.CONNECT, this::connect,
             UserGameCommand.CommandType.MAKE_MOVE, this::makeMove,
             UserGameCommand.CommandType.RESIGN, this::resign,
@@ -258,7 +258,7 @@ public class WebsocketHandler extends Handler {
     public void onMessage(WsMessageContext ctx) {
         UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
 
-        COMMANDS.get(command.getCommandType())
+        commands.get(command.getCommandType())
                 .accept(command, ctx);
     }
 

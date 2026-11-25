@@ -59,51 +59,22 @@ public class PregameTerminalView extends REPLTerminalView {
     }
 
     private void helpHandler(List<String> arguments) {
-        TerminalBuffer.Decoration header = new TerminalBuffer.Decoration(
-                null,
-                TerminalBuffer.Color.WHITE,
-                null,
-                0
-        );
-        TerminalBuffer.Decoration divider = new TerminalBuffer.Decoration(
-                null,
-                TerminalBuffer.Color.DARK_GREY,
-                TerminalBuffer.Style.FAINT,
-                0
-        );
-        TerminalBuffer.Decoration body = new TerminalBuffer.Decoration(
-                null,
-                TerminalBuffer.Color.BLUE,
-                null,
-                0
-        );
-
         if (authState.getAuth() == null)  {
-            replLines.addAll(List.of(
-                    new REPLLine("", body),
-                    new REPLLine("♟  COMMANDS & USAGE", header),
-                    new REPLLine("────────────────────────────────────────────────────────────", divider),
-                    new REPLLine("▸ register <user> <pass> <email>   Create an account", body),
-                    new REPLLine("▸ login    <user> <pass>           Sign in to play", body),
-                    new REPLLine("▸ help                             Show available commands", body),
-                    new REPLLine("▸ quit                             Resign / exit the program", body),
-                    new REPLLine("────────────────────────────────────────────────────────────", divider),
-                    new REPLLine(" ", body)
+            addHelpTable(List.of(
+                    new HelpTableRow("register", List.of("<user>", "<pass>", "<email>"), "Create an account"),
+                    new HelpTableRow("login", List.of("<user>", "<pass>"), "Sign in to play"),
+                    new HelpTableRow("help", List.of(), "Show available commands"),
+                    new HelpTableRow("quit", List.of(), "Exit the program")
             ));
         } else {
-            replLines.addAll(List.of(
-                    new REPLLine("", body),
-                    new REPLLine("♟  COMMANDS & USAGE", header),
-                    new REPLLine("────────────────────────────────────────────────────────────", divider),
-                    new REPLLine("▸ create <name>                    Create a new game", body),
-                    new REPLLine("▸ list                             List games on the server", body),
-                    new REPLLine("▸ join <id> <WHITE/BLACK>          Join a game with a color by ID", body),
-                    new REPLLine("▸ observe <id>                     Observe a game in real time", body),
-                    new REPLLine("▸ logout                           Log out of your account", body),
-                    new REPLLine("▸ quit                             Resign / exit the program", body),
-                    new REPLLine("▸ help                             Show available commands", body),
-                    new REPLLine("────────────────────────────────────────────────────────────", divider),
-                    new REPLLine(" ", body)
+            addHelpTable(List.of(
+                    new HelpTableRow("create", List.of("<name>"), "Create an account"),
+                    new HelpTableRow("list", List.of(), "List games on the server"),
+                    new HelpTableRow("join", List.of("<id>", "<WHITE/BLACK>"), "Join a game with a color by ID"),
+                    new HelpTableRow("observe", List.of("<id>"), "Observe a game in real time"),
+                    new HelpTableRow("logout", List.of(), "Log out of your account"),
+                    new HelpTableRow("quit", List.of(), "Exit the program"),
+                    new HelpTableRow("help", List.of(), "Show available commands")
             ));
         }
     }

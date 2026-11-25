@@ -143,6 +143,51 @@ public class REPLTerminalView extends TerminalView {
         ));
     }
 
+    protected record HelpTableRow(
+            String command,
+            List<String> parameters,
+            String description
+    ) {}
+
+    protected void addHelpTable(List<HelpTableRow> rows) {
+        TerminalBuffer.Decoration header = new TerminalBuffer.Decoration(
+                null,
+                TerminalBuffer.Color.WHITE,
+                null,
+                0
+        );
+        TerminalBuffer.Decoration divider = new TerminalBuffer.Decoration(
+                null,
+                TerminalBuffer.Color.DARK_GREY,
+                TerminalBuffer.Style.FAINT,
+                0
+        );
+        TerminalBuffer.Decoration body = new TerminalBuffer.Decoration(
+                null,
+                TerminalBuffer.Color.BLUE,
+                null,
+                0
+        );
+
+        ArrayList<REPLLine> lines = new ArrayList<>();
+        lines.add(new REPLLine("", body));
+        lines.add(new REPLLine("♟  COMMANDS & USAGE", header));
+        lines.add(new REPLLine("────────────────────────────────────────────────────────────", divider));
+
+        for (HelpTableRow row : rows) {
+            lines.add(new REPLLine(
+                    String.format("%-10s", row.command)
+                    + String.format("%-25s", String.join(" ", row.parameters))
+                    + row.description,
+                    body
+            ));
+        }
+
+        lines.add(new REPLLine(" ", body));
+
+        replLines.addAll(lines);
+    }
+
     protected void render() {}
 
     @Override
