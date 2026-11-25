@@ -91,20 +91,6 @@ public class GameTerminalView extends REPLTerminalView {
                 0
         );
 
-        TerminalBuffer.Decoration blackDecoration = new TerminalBuffer.Decoration(
-                TerminalBuffer.Color.BLACK,
-                TerminalBuffer.Color.WHITE,
-                TerminalBuffer.Style.BOLD,
-                0
-        );
-
-        TerminalBuffer.Decoration whiteDecoration = new TerminalBuffer.Decoration(
-                TerminalBuffer.Color.WHITE,
-                TerminalBuffer.Color.BLACK,
-                TerminalBuffer.Style.BOLD,
-                0
-        );
-
         boardBuffer.clearBuffer();
 
         if (gameState.getTeam() == ChessGame.TeamColor.WHITE) {
@@ -129,9 +115,7 @@ public class GameTerminalView extends REPLTerminalView {
             boardBuffer.writeToBuffer(currentRow, 1, currentIndex, indexDecoration);
 
             for (ChessPiece piece : row) {
-                TerminalBuffer.Decoration currentDecoration = (currentRow + currentCol) % 2 == 1
-                        ? whiteDecoration
-                        : blackDecoration;
+                TerminalBuffer.Decoration currentDecoration = getCurrentDecoration(piece, currentRow, currentCol);
 
                 String squareText;
 
@@ -162,6 +146,35 @@ public class GameTerminalView extends REPLTerminalView {
         }
 
         boardBuffer.render();
+    }
+
+    private static TerminalBuffer.Decoration getCurrentDecoration(ChessPiece piece, int currentRow, int currentCol) {
+        TerminalBuffer.Decoration blackDecoration = new TerminalBuffer.Decoration(
+                TerminalBuffer.Color.BLACK,
+                piece == null || piece.getTeamColor() == ChessGame.TeamColor.WHITE ? (
+                        TerminalBuffer.Color.BLUE
+                ) : (
+                        TerminalBuffer.Color.LIGHT_GREY
+                ),
+                TerminalBuffer.Style.BOLD,
+                0
+        );
+
+        TerminalBuffer.Decoration whiteDecoration = new TerminalBuffer.Decoration(
+                TerminalBuffer.Color.WHITE,
+                piece == null || piece.getTeamColor() == ChessGame.TeamColor.WHITE ? (
+                        TerminalBuffer.Color.BLUE
+                ) : (
+                        TerminalBuffer.Color.LIGHT_GREY
+                ),
+                TerminalBuffer.Style.BOLD,
+                0
+        );
+
+        TerminalBuffer.Decoration currentDecoration = (currentRow + currentCol) % 2 == 1
+                ? whiteDecoration
+                : blackDecoration;
+        return currentDecoration;
     }
 
     public void loadGame(GameData data) {
