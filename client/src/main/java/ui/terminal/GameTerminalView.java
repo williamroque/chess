@@ -1,12 +1,12 @@
 package ui.terminal;
 
-import chess.ChessGame;
-import chess.ChessPiece;
+import chess.*;
 import client.communication.ServerFacade;
 import model.GameData;
 import ui.state.AuthState;
 import ui.state.GameState;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -193,7 +193,7 @@ public class GameTerminalView extends REPLTerminalView {
                 new REPLLine("", body),
                 new REPLLine("♟  COMMANDS & USAGE", header),
                 new REPLLine("────────────────────────────────────────────────────────────", divider),
-                new REPLLine("▸ move     <start> <end>           Move a piece using algebraic notation", body),
+                new REPLLine("▸ move     <move>                  Move a piece using algebraic notation", body),
                 new REPLLine("▸ legal    <position>              Highlight all legal moves for a piece", body),
                 new REPLLine("▸ redraw                           Refresh the chess board", body),
                 new REPLLine("▸ leave                            Leave the game without resigning", body),
@@ -204,10 +204,46 @@ public class GameTerminalView extends REPLTerminalView {
         ));
     }
 
+    private void moveHandler(List<String> arguments) {
+        if (arguments.size() != 1) {
+            showError("Wrong number of arguments for `move`.");
+            showError("▸ move <move>");
+            return;
+        }
+
+        ChessMove move;
+
+        try {
+            move = ChessMove.buildMove(arguments.getFirst());
+        } catch (InvalidMoveException e) {
+            showError("Invalid chess move. Use algebraic notation (e.g., d2d4).");
+            return;
+        }
+
+        try {
+            facade.makeMove(authState.getAuth().authToken(), gameState.getGame().gameID(), move);
+        } catch (IOException e) {
+            showError("Connection error.");
+        }
+    }
+
     private void leaveHandler(List<String> arguments) {
+        if (!arguments.isEmpty()) {
+            showError("Wrong number of arguments for `leave`.");
+            showError("▸ leave");
+            return;
+        }
+
+        try {
+            facade.leave(authState.getAuth().authToken(), gameState.getGame().gameID());
+        } catch (IOException e) {
+            showError("Connection error.");
+        }
+
         gameState.clearTeam();
         gameState.clearGame();
         replLines.clear();
+
         unmount();
     }
 
@@ -215,6 +251,7 @@ public class GameTerminalView extends REPLTerminalView {
     protected void initializeCommands() {
         registerCommand("help", this::helpHandler, () -> true);
         registerCommand("leave", this::leaveHandler, () -> true);
+        registerCommand("move", this::moveHandler, () -> true);
     }
 
     @Override

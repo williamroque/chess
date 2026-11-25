@@ -1,5 +1,6 @@
 package client.communication;
 
+import chess.ChessMove;
 import client.exceptions.FacadeException;
 import com.google.gson.Gson;
 import jakarta.websocket.DeploymentException;
@@ -148,6 +149,33 @@ public class ServerFacade {
                 authToken,
                 gameID,
                 null));
+    }
+
+    public void leave(String authToken, int gameID) throws IOException {
+        websocketCommunicator.send(new UserGameCommand(
+                UserGameCommand.CommandType.LEAVE,
+                authToken,
+                gameID,
+                null
+        ));
+    }
+
+    public void resign(String authToken, int gameID) throws IOException {
+        websocketCommunicator.send(new UserGameCommand(
+                UserGameCommand.CommandType.RESIGN,
+                authToken,
+                gameID,
+                null
+        ));
+    }
+
+    public void makeMove(String authToken, int gameID, ChessMove move) throws IOException {
+        websocketCommunicator.send(new UserGameCommand(
+                UserGameCommand.CommandType.MAKE_MOVE,
+                authToken,
+                gameID,
+                move
+        ));
     }
 
     public ServerFacade(HttpCommunicator httpCommunicator, WebsocketCommunicator websocketCommunicator) {

@@ -44,6 +44,19 @@ public class ChessMove {
         return promotionPiece;
     }
 
+    public static ChessMove buildMove(String notation) throws InvalidMoveException {
+        notation = notation.trim().toLowerCase();
+
+        if (!notation.matches("^[a-h][1-8][a-h][1-8]$")) {
+            throw new InvalidMoveException();
+        }
+
+        ChessPosition startPosition = ChessBoard.algebraicToMatrix(notation.substring(0, 2));
+        ChessPosition endPosition = ChessBoard.algebraicToMatrix(notation.substring(2));
+
+        return new ChessMove(startPosition, endPosition, null);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

@@ -276,21 +276,6 @@ public class ChessGame {
         };
     }
 
-    public void makeMove(String notation) throws InvalidMoveException {
-        notation = notation.trim().toLowerCase();
-
-        if (!notation.matches("^[a-h][0-8][a-h][0-8]$")) {
-            throw new InvalidMoveException();
-        }
-
-        ChessPosition startPosition = ChessBoard.algebraicToMatrix(notation.substring(0, 2));
-        ChessPosition endPosition = ChessBoard.algebraicToMatrix(notation.substring(2));
-
-        ChessMove move = new ChessMove(startPosition, endPosition, null);
-
-        makeMove(move);
-    }
-
     /**
      * Makes a move in the chess game
      *
