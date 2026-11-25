@@ -107,6 +107,11 @@ public class WebsocketHandler extends Handler {
             }
 
             ChessGame game = data.game();
+
+            if (game.getTeamTurn() != userColor) {
+                throw new InvalidMoveException("Error: It's not your turn");
+            }
+
             ChessMove move = command.getMove();
 
             ChessPiece startPiece = game.getBoard().getPiece(move.getStartPosition());

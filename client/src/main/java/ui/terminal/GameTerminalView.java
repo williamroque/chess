@@ -7,8 +7,7 @@ import ui.state.AuthState;
 import ui.state.GameState;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GameTerminalView extends REPLTerminalView {
     TerminalBuffer replBuffer;
@@ -32,6 +31,8 @@ public class GameTerminalView extends REPLTerminalView {
             ChessPiece.PieceType.PAWN,   "♟"
     );
 
+    private final HashSet<ChessPosition> legalHighlights = new HashSet<>();
+
     public GameTerminalView(TerminalViewManager manager, ServerFacade facade, AuthState authState, GameState gameState) {
         super(manager, facade, authState, gameState);
 
@@ -53,36 +54,13 @@ public class GameTerminalView extends REPLTerminalView {
             return;
         }
 
-        ChessPiece[][] board = gameState.getGame()
+        ChessBoard board = gameState.getGame()
                 .game()
-                .getBoard()
-                .getBoardConfiguration();
+                .getBoard();
 
-        if (gameState.getTeam() == ChessGame.TeamColor.BLACK) {
-            int boardStart = 0;
-            int boardEnd = board.length - 1;
-
-            while (boardStart < boardEnd) {
-                ChessPiece[] temp = board[boardStart];
-                board[boardStart] = board[boardEnd];
-                board[boardEnd] = temp;
-                boardStart++;
-                boardEnd--;
-            }
-
-            for (ChessPiece[] row : board) {
-                int start = 0;
-                int end = board.length - 1;
-
-                while (start < end) {
-                    ChessPiece temp = row[start];
-                    row[start] = row[end];
-                    row[end] = temp;
-                    start++;
-                    end--;
-                }
-            }
-        }
+        ArrayList<ArrayList<ChessPosition>> boardPositions = board.getBoardPositions(
+                gameState.getTeam() == null ? ChessGame.TeamColor.WHITE : gameState.getTeam()
+        );
 
         TerminalBuffer.Decoration indexDecoration = new TerminalBuffer.Decoration(
                 null,
@@ -101,7 +79,7 @@ public class GameTerminalView extends REPLTerminalView {
 
         int currentRow = 2;
 
-        for (ChessPiece[] row : board) {
+        for (ArrayList<ChessPosition> row : boardPositions) {
             int currentCol = 1;
 
             String currentIndex;
@@ -114,8 +92,10 @@ public class GameTerminalView extends REPLTerminalView {
 
             boardBuffer.writeToBuffer(currentRow, 1, currentIndex, indexDecoration);
 
-            for (ChessPiece piece : row) {
-                TerminalBuffer.Decoration currentDecoration = getCurrentDecoration(piece, currentRow, currentCol);
+            for (ChessPosition position : row) {
+                ChessPiece piece = board.getPiece(position);
+
+                TerminalBuffer.Decoration currentDecoration = getCurrentDecoration(piece, position);
 
                 String squareText;
 
@@ -148,9 +128,11 @@ public class GameTerminalView extends REPLTerminalView {
         boardBuffer.render();
     }
 
-    private static TerminalBuffer.Decoration getCurrentDecoration(ChessPiece piece, int currentRow, int currentCol) {
+    private TerminalBuffer.Decoration getCurrentDecoration(ChessPiece piece, ChessPosition position) {
+        boolean isHighlighted = legalHighlights.contains(position);
+
         TerminalBuffer.Decoration blackDecoration = new TerminalBuffer.Decoration(
-                TerminalBuffer.Color.BLACK,
+                isHighlighted ? TerminalBuffer.Color.YELLOW : TerminalBuffer.Color.BLACK,
                 piece == null || piece.getTeamColor() == ChessGame.TeamColor.WHITE ? (
                         TerminalBuffer.Color.BLUE
                 ) : (
@@ -161,7 +143,7 @@ public class GameTerminalView extends REPLTerminalView {
         );
 
         TerminalBuffer.Decoration whiteDecoration = new TerminalBuffer.Decoration(
-                TerminalBuffer.Color.WHITE,
+                isHighlighted ? TerminalBuffer.Color.YELLOW : TerminalBuffer.Color.WHITE,
                 piece == null || piece.getTeamColor() == ChessGame.TeamColor.WHITE ? (
                         TerminalBuffer.Color.BLUE
                 ) : (
@@ -171,10 +153,9 @@ public class GameTerminalView extends REPLTerminalView {
                 0
         );
 
-        TerminalBuffer.Decoration currentDecoration = (currentRow + currentCol) % 2 == 1
+        return (position.getRow() + position.getColumn()) % 2 == 0
                 ? whiteDecoration
                 : blackDecoration;
-        return currentDecoration;
     }
 
     public void loadGame(GameData data) {
@@ -233,6 +214,8 @@ public class GameTerminalView extends REPLTerminalView {
             return;
         }
 
+        legalHighlights.clear();
+
         try {
             facade.makeMove(authState.getAuth().authToken(), gameState.getGame().gameID(), move);
         } catch (Exception e) {
@@ -281,9 +264,41 @@ public class GameTerminalView extends REPLTerminalView {
             return;
         }
 
+        legalHighlights.clear();
         renderBoard();
     }
 
+    private void legalMovesHandler(List<String> arguments) {
+        if (arguments.size() != 1) {
+            showError("Wrong number of arguments for `legal`.");
+            showError("▸ legal <position>");
+            return;
+        }
+
+        ChessPosition position;
+
+        try {
+            position = ChessBoard.algebraicToMatrix(arguments.getFirst());
+        } catch (InvalidMoveException e) {
+            showError(e.getMessage());
+            return;
+        }
+
+        Collection<ChessMove> moves = gameState.getGame().game().validMoves(position);
+
+        if (moves == null) {
+            showError("Error: There are no valid moves for this position");
+            return;
+        }
+
+        legalHighlights.clear();
+
+        for (ChessMove move : moves) {
+            legalHighlights.add(move.getEndPosition());
+        }
+
+        renderBoard();
+    }
 
     @Override
     protected void initializeCommands() {
@@ -292,6 +307,7 @@ public class GameTerminalView extends REPLTerminalView {
         registerCommand("resign", this::resignHandler, () -> true);
         registerCommand("redraw", this::redrawHandler, () -> true);
         registerCommand("move", this::moveHandler, () -> true);
+        registerCommand("legal", this::legalMovesHandler, () -> true);
     }
 
     @Override

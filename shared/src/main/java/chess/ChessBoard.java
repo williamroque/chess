@@ -1,5 +1,6 @@
 package chess;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 import static java.lang.Integer.parseInt;
@@ -74,7 +75,11 @@ public class ChessBoard {
         board = new ChessPiece[BOARD_HEIGHT][BOARD_WIDTH];
     }
 
-    public static ChessPosition algebraicToMatrix(String notation) {
+    public static ChessPosition algebraicToMatrix(String notation) throws InvalidMoveException {
+        if (!notation.matches("^[a-h][1-8]$")) {
+            throw new InvalidMoveException("Error: Invalid position");
+        }
+
         String files = "abcdefgh";
 
         int row = parseInt(String.valueOf(notation.charAt(1)));
@@ -157,10 +162,46 @@ public class ChessBoard {
 
             ChessGame.TeamColor team = parsed[0].equals("W") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
             ChessPiece.PieceType type = PIECE_REGISTRY.get(parsed[1]);
-            ChessPosition position = algebraicToMatrix(parsed[2]);
+            ChessPosition position = null;
+            try {
+                position = algebraicToMatrix(parsed[2]);
+            } catch (InvalidMoveException e) {
+                throw new RuntimeException(e);
+            }
 
             addPiece(position, new ChessPiece(team, type));
         }
+    }
+
+    public ArrayList<ArrayList<ChessPosition>> getBoardPositions(ChessGame.TeamColor team) {
+        ArrayList<ArrayList<ChessPosition>> positions = new ArrayList<>();
+
+        switch (team) {
+            case WHITE -> {
+                for (int i = board.length; i >= 1; i--) {
+                    ArrayList<ChessPosition> row = new ArrayList<>();
+
+                    for (int j = 1; j <= board[0].length; j++) {
+                        row.add(new ChessPosition(i, j));
+                    }
+
+                    positions.add(row);
+                }
+            }
+            case BLACK -> {
+                for (int i = 1; i <= board.length; i++) {
+                    ArrayList<ChessPosition> row = new ArrayList<>();
+
+                    for (int j = board[0].length; j >= 1; j--) {
+                        row.add(new ChessPosition(i, j));
+                    }
+
+                    positions.add(row);
+                }
+            }
+        }
+
+        return positions;
     }
 
     public ChessPiece[][] getBoardConfiguration() {
