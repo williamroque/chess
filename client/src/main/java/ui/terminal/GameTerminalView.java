@@ -204,16 +204,17 @@ public class GameTerminalView extends REPLTerminalView {
         ));
     }
 
-    private void quitHandler(List<String> arguments) {
+    private void leaveHandler(List<String> arguments) {
         gameState.clearTeam();
         gameState.clearGame();
+        replLines.clear();
         unmount();
     }
 
     @Override
     protected void initializeCommands() {
         registerCommand("help", this::helpHandler, () -> true);
-        registerCommand("quit", this::quitHandler, () -> true);
+        registerCommand("leave", this::leaveHandler, () -> true);
     }
 
     @Override

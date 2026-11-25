@@ -135,10 +135,10 @@ public class REPLTerminalView extends TerminalView {
         replLines.add(new REPLLine(content, decoration));
     }
 
-    private void appendLine(String content, TerminalBuffer.Decoration decoration) {
-        REPLLine lastLine = replLines.removeLast();
-        replLines.add(new REPLLine(
-                lastLine.content() + content,
+    private void appendLine(int index, String content, TerminalBuffer.Decoration decoration) {
+        REPLLine line = replLines.get(index);
+        replLines.set(index, new REPLLine(
+                line.content() + content,
                 decoration
         ));
     }
@@ -164,6 +164,8 @@ public class REPLTerminalView extends TerminalView {
                     )
             );
 
+            int lineIndex = replLines.size() - 1;
+
             clearView();
             render();
 
@@ -173,6 +175,7 @@ public class REPLTerminalView extends TerminalView {
 
             String line = scanner.nextLine();
             appendLine(
+                    lineIndex,
                     line,
                     new TerminalBuffer.Decoration(
                             null,
