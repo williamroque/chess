@@ -29,7 +29,8 @@ public class WebsocketHandler extends Handler {
     Map<UserGameCommand.CommandType, BiConsumer<UserGameCommand, WsContext>> COMMANDS = Map.of(
             UserGameCommand.CommandType.CONNECT, this::connect,
             UserGameCommand.CommandType.MAKE_MOVE, this::makeMove,
-            UserGameCommand.CommandType.RESIGN, this::resign
+            UserGameCommand.CommandType.RESIGN, this::resign,
+            UserGameCommand.CommandType.LEAVE, this::leave
     );
 
     public WebsocketHandler(GameService gameService, UserService userService, ConnectionManager manager) {
@@ -55,9 +56,9 @@ public class WebsocketHandler extends Handler {
 
             String userColor = null;
 
-            if (game.whiteUsername().equals(username)) {
+            if (game.whiteUsername() != null && game.whiteUsername().equals(username)) {
                 userColor = "white";
-            } else if (game.blackUsername().equals(username)) {
+            } else if (game.blackUsername() != null && game.blackUsername().equals(username)) {
                 userColor = "black";
             }
 
@@ -95,9 +96,9 @@ public class WebsocketHandler extends Handler {
 
             ChessGame.TeamColor userColor = null;
 
-            if (data.blackUsername().equals(currentUsername)) {
+            if (data.blackUsername() != null && data.blackUsername().equals(currentUsername)) {
                 userColor = ChessGame.TeamColor.BLACK;
-            } else if (data.whiteUsername().equals(currentUsername)) {
+            } else if (data.whiteUsername() != null && data.whiteUsername().equals(currentUsername)) {
                 userColor = ChessGame.TeamColor.WHITE;
             }
 
@@ -165,9 +166,9 @@ public class WebsocketHandler extends Handler {
 
             ChessGame.TeamColor userColor = null;
 
-            if (data.blackUsername().equals(currentUsername)) {
+            if (data.blackUsername() != null && data.blackUsername().equals(currentUsername)) {
                 userColor = ChessGame.TeamColor.BLACK;
-            } else if (data.whiteUsername().equals(currentUsername)) {
+            } else if (data.whiteUsername() != null && data.whiteUsername().equals(currentUsername)) {
                 userColor = ChessGame.TeamColor.WHITE;
             }
 
@@ -187,6 +188,54 @@ public class WebsocketHandler extends Handler {
             manager.broadcast(gameID, new NotificationMessage(
                     (userColor == ChessGame.TeamColor.BLACK ? "Black" : "White") + " team has resigned"
             ), null);
+        } catch (DataAccessException e) {
+            connection.send(new ErrorMessage("Error: Invalid credentials or game ID"));
+        }
+    }
+
+    private void leave(UserGameCommand command, WsContext ctx) {
+        String authToken = command.getAuthToken();
+        int gameID = command.getGameID();
+
+        Connection connection = new Connection(
+                authToken,
+                ctx,
+                gameID
+        );
+
+        try {
+            if (!gameService.checkGame(authToken, gameID)) {
+                throw new InvalidCredentialsException("");
+            }
+
+            String currentUsername = userService.getUsernameByToken(authToken);
+
+            GameData data = gameService.getGame(authToken, gameID);
+
+            if (data.blackUsername() != null && data.blackUsername().equals(currentUsername)) {
+                GameData updatedData = new GameData(
+                        gameID,
+                        data.whiteUsername(),
+                        null,
+                        data.gameName(),
+                        data.game()
+                );
+                gameService.updateGame(authToken, updatedData);
+            } else if (data.whiteUsername() != null && data.whiteUsername().equals(currentUsername)) {
+                GameData updatedData = new GameData(
+                        gameID,
+                        null,
+                        data.blackUsername(),
+                        data.gameName(),
+                        data.game()
+                );
+                gameService.updateGame(authToken, updatedData);
+            }
+
+            manager.remove(authToken);
+            manager.broadcast(gameID, new NotificationMessage(
+                    currentUsername + " has left the game"
+            ), authToken);
         } catch (DataAccessException e) {
             connection.send(new ErrorMessage("Error: Invalid credentials or game ID"));
         }
