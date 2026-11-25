@@ -28,7 +28,8 @@ public class WebsocketHandler extends Handler {
 
     Map<UserGameCommand.CommandType, BiConsumer<UserGameCommand, WsContext>> COMMANDS = Map.of(
             UserGameCommand.CommandType.CONNECT, this::connect,
-            UserGameCommand.CommandType.MAKE_MOVE, this::makeMove
+            UserGameCommand.CommandType.MAKE_MOVE, this::makeMove,
+            UserGameCommand.CommandType.RESIGN, this::resign
     );
 
     public WebsocketHandler(GameService gameService, UserService userService, ConnectionManager manager) {
@@ -42,18 +43,12 @@ public class WebsocketHandler extends Handler {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
 
-        Connection connection = new Connection(
-                authToken,
-                ctx,
-                gameID
-        );
-
         try {
             if (!gameService.checkGame(authToken, gameID)) {
                 throw new InvalidCredentialsException("");
             }
 
-            manager.add(authToken, ctx, gameID);
+            Connection connection = manager.add(authToken, ctx, gameID);
 
             GameData game = gameService.getGame(authToken, gameID);
             String username = userService.getUsernameByToken(authToken);
@@ -74,6 +69,7 @@ public class WebsocketHandler extends Handler {
                     )
             ), authToken);
         } catch (DataAccessException e) {
+            Connection connection = new Connection(authToken, ctx, gameID);
             connection.send(new ErrorMessage("Error: Invalid credentials or game ID"));
         }
     }
@@ -122,19 +118,77 @@ public class WebsocketHandler extends Handler {
                     currentUsername + " just moved"
             ), authToken);
 
-            if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
-                manager.broadcast(gameID, new NotificationMessage(
-                        "The game has ended in checkmate. Black wins!"
-                ), null);
-            } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
-                manager.broadcast(gameID, new NotificationMessage(
-                        "The game has ended in checkmate. White wins!"
-                ), null);
+            ChessGame.TeamColor winner = game.getWinner();
+
+            if (winner == null) {
+                return;
+            }
+
+            switch (winner) {
+                case WHITE:
+                    manager.broadcast(gameID, new NotificationMessage(
+                            "The game has ended in checkmate. White wins!"
+                    ), null);
+                    break;
+                case BLACK:
+                    manager.broadcast(gameID, new NotificationMessage(
+                            "The game has ended in checkmate. Black wins!"
+                    ), null);
+                    break;
             }
         } catch (DataAccessException e) {
             connection.send(new ErrorMessage("Error: Invalid credentials or game ID"));
         } catch (InvalidMoveException e) {
             connection.send(new ErrorMessage("Error: Invalid chess move"));
+        }
+    }
+
+    private void resign(UserGameCommand command, WsContext ctx) {
+        String authToken = command.getAuthToken();
+        int gameID = command.getGameID();
+
+        Connection connection = new Connection(
+                authToken,
+                ctx,
+                gameID
+        );
+
+        try {
+            if (!gameService.checkGame(authToken, gameID)) {
+                throw new InvalidCredentialsException("");
+            }
+
+            String currentUsername = userService.getUsernameByToken(authToken);
+
+            GameData data = gameService.getGame(authToken, gameID);
+            ChessGame game = data.game();
+
+            ChessGame.TeamColor userColor = null;
+
+            if (data.blackUsername().equals(currentUsername)) {
+                userColor = ChessGame.TeamColor.BLACK;
+            } else if (data.whiteUsername().equals(currentUsername)) {
+                userColor = ChessGame.TeamColor.WHITE;
+            }
+
+            if (userColor == null) {
+                connection.send(new ErrorMessage("Error: Non-player user cannot resign"));
+                return;
+            }
+
+            if (game.isGameOver()) {
+                connection.send(new ErrorMessage("Error: The game is already over"));
+                return;
+            }
+
+            game.resign(userColor);
+            gameService.updateGame(authToken, data);
+
+            manager.broadcast(gameID, new NotificationMessage(
+                    (userColor == ChessGame.TeamColor.BLACK ? "Black" : "White") + " team has resigned"
+            ), null);
+        } catch (DataAccessException e) {
+            connection.send(new ErrorMessage("Error: Invalid credentials or game ID"));
         }
     }
 

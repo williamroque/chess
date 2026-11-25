@@ -10,8 +10,16 @@ import java.util.Map;
 public class ConnectionManager {
     Map<String, Connection> connections = new HashMap<>();
 
-    public void add(String authToken, WsContext ctx, int gameID) {
-        connections.put(authToken, new Connection(authToken, ctx, gameID));
+    public Connection add(String authToken, WsContext ctx, int gameID) {
+        Connection connection = new Connection(authToken, ctx, gameID);
+
+        connections.put(authToken, connection);
+
+        return connection;
+    }
+
+    public Connection get(String authToken) {
+        return connections.get(authToken);
     }
 
     public void remove(String authToken) {

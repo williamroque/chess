@@ -20,7 +20,9 @@ public class ChessGame {
         WHITE_QUEENSIDE_ROOK_MOVED,
         BLACK_QUEENSIDE_ROOK_MOVED,
         WHITE_KINGSIDE_ROOK_MOVED,
-        BLACK_KINGSIDE_ROOK_MOVED;
+        BLACK_KINGSIDE_ROOK_MOVED,
+        WHITE_WON,
+        BLACK_WON;
     }
 
     private EnumSet<GameFlags> currentFlags = EnumSet.noneOf(GameFlags.class);
@@ -296,6 +298,10 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (isGameOver()) {
+            throw new InvalidMoveException();
+        }
+
         ChessPiece piece = board.getPiece(move.getStartPosition());
 
         boolean moveChecks = (
@@ -329,6 +335,7 @@ public class ChessGame {
         }
 
         teamTurn = teamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        updateWinner();
     }
 
     private static ChessMove getRookCastlingMove(ChessMove move) {
@@ -371,6 +378,39 @@ public class ChessGame {
         }
 
         return false;
+    }
+
+    public boolean isGameOver() {
+        return getWinner() != null;
+    }
+
+    public TeamColor getWinner() {
+        if (currentFlags.contains(GameFlags.WHITE_WON)) {
+            return TeamColor.WHITE;
+        } else if (currentFlags.contains(GameFlags.BLACK_WON)) {
+            return TeamColor.BLACK;
+        }
+
+        return null;
+    }
+
+    public void resign(TeamColor team) {
+        switch (team) {
+            case WHITE:
+                currentFlags.add(GameFlags.BLACK_WON);
+                break;
+            case BLACK:
+                currentFlags.add(GameFlags.WHITE_WON);
+                break;
+        }
+    }
+
+    private void updateWinner() {
+        if (isInCheckmate(TeamColor.WHITE)) {
+            currentFlags.add(GameFlags.BLACK_WON);
+        } else if (isInCheckmate(TeamColor.BLACK)) {
+            currentFlags.add(GameFlags.WHITE_WON);
+        }
     }
 
     /**
